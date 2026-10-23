@@ -237,6 +237,25 @@ public final class Config
         set(KEY_ENABLE_BACKGROUND, value);
     }
 
+    public static final String BG_SOURCE_ASSETS = "assets";
+    public static final String BG_SOURCE_PICKER = "picker";
+    public static final String BG_SOURCE_FOLDER = "folder";
+
+    public static final String KEY_BACKGROUND_SOURCE = "bg_source";
+
+    public static String getBackgroundSource()
+    {
+        Object value = get(KEY_BACKGROUND_SOURCE, BG_SOURCE_ASSETS);
+        if (value instanceof String)
+            return (String)value;
+        return BG_SOURCE_ASSETS;
+    }
+
+    public static void setBackgroundSource(String value)
+    {
+        set(KEY_BACKGROUND_SOURCE, value);
+    }
+
     public static final String KEY_ENABLE_EXTENDED_GRID_MENU = "enable_extended_grid_menu";
 
     public static boolean getEnableExtendedGridMenu()
@@ -604,5 +623,109 @@ public final class Config
     public static void setRestoreGoogleDriveBackup(boolean value)
     {
         set(KEY_RESTORE_GOOGLE_DRIVE_BACKUP, value);
+    }
+
+    public static final String KEY_UNLOCK_CHAT_REACTION = "unlock_chat_reaction";
+
+    public static boolean getUnlockChatReaction()
+    {
+        return (boolean)get(KEY_UNLOCK_CHAT_REACTION, false);
+    }
+
+    public static void setUnlockChatReaction(boolean value)
+    {
+        set(KEY_UNLOCK_CHAT_REACTION, value);
+    }
+
+    public static final String KEY_ENABLE_BACKUP_INTERVAL = "enable_backup_interval";
+
+    public static boolean getEnableBackupInterval()
+    {
+        return (boolean)get(KEY_ENABLE_BACKUP_INTERVAL, false);
+    }
+
+    public static void setEnableBackupInterval(boolean value)
+    {
+        set(KEY_ENABLE_BACKUP_INTERVAL, value);
+    }
+
+    public static final String KEY_BACKUP_INTERVAL_HOURS = "backup_interval_hours";
+
+    public static int getBackupIntervalHours()
+    {
+        Object value = get(KEY_BACKUP_INTERVAL_HOURS, 6);
+        int hours = value instanceof Number ? ((Number)value).intValue() : 6;
+        if (hours != 1 && hours != 3 && hours != 6 && hours != 12)
+            hours = 6;
+        return hours;
+    }
+
+    public static void setBackupIntervalHours(int value)
+    {
+        if (value != 1 && value != 3 && value != 6 && value != 12)
+            value = 6;
+        set(KEY_BACKUP_INTERVAL_HOURS, value);
+    }
+
+    public static final String KEY_ENABLE_AVATAR_SAVING = "enable_avatar_saving";
+
+    public static boolean getEnableAvatarSaving()
+    {
+        return (boolean)get(KEY_ENABLE_AVATAR_SAVING, false);
+    }
+
+    public static void setEnableAvatarSaving(boolean value)
+    {
+        set(KEY_ENABLE_AVATAR_SAVING, value);
+    }
+
+    public static final String KEY_ENABLE_COVER_SAVING = "enable_cover_saving";
+
+    public static boolean getEnableCoverSaving()
+    {
+        return (boolean)get(KEY_ENABLE_COVER_SAVING, false);
+    }
+
+    public static void setEnableCoverSaving(boolean value)
+    {
+        set(KEY_ENABLE_COVER_SAVING, value);
+    }
+
+    public static final String KEY_CUSTOM_FONT_ENABLED = "custom_font_enabled";
+
+    public static boolean getCustomFontEnabled()
+    {
+        return (boolean)get(KEY_CUSTOM_FONT_ENABLED, false);
+    }
+
+    public static void setCustomFontEnabled(boolean value)
+    {
+        set(KEY_CUSTOM_FONT_ENABLED, value);
+    }
+
+    public static final String KEY_CUSTOM_FONT_PATH = "custom_font_path";
+
+    public static String getCustomFontPath()
+    {
+        Object value = get(KEY_CUSTOM_FONT_PATH, "");
+        return value instanceof String ? (String)value : "";
+    }
+
+    public static void setCustomFontPath(String value)
+    {
+        set(KEY_CUSTOM_FONT_PATH, value == null ? "" : value);
+    }
+
+    public static final String KEY_CUSTOM_FONT_NAME = "custom_font_name";
+
+    public static String getCustomFontName()
+    {
+        Object value = get(KEY_CUSTOM_FONT_NAME, "");
+        return value instanceof String ? (String)value : "";
+    }
+
+    public static void setCustomFontName(String value)
+    {
+        set(KEY_CUSTOM_FONT_NAME, value == null ? "" : value);
     }
 }

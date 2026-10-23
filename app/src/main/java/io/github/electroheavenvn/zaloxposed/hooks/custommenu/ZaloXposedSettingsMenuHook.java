@@ -1,11 +1,14 @@
 package io.github.electroheavenvn.zaloxposed.hooks.custommenu;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.ActivityNotFoundException;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
@@ -27,12 +30,15 @@ import android.widget.Toast;
 import io.github.electroheavenvn.zaloxposed.MorpheConstants;
 import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
 import io.github.electroheavenvn.zaloxposed.hooks.ResourceHook;
+import io.github.electroheavenvn.zaloxposed.utilities.BackgroundUtils;
 import io.github.electroheavenvn.zaloxposed.utilities.Config;
+import io.github.electroheavenvn.zaloxposed.utilities.CustomFont;
 import io.github.electroheavenvn.zaloxposed.utilities.Logger;
 import io.github.electroheavenvn.zaloxposed.utilities.Utils;
 
 import org.luckypray.dexkit.query.FindMethod;
 import org.luckypray.dexkit.query.enums.StringMatchType;
+import org.luckypray.dexkit.query.matchers.FieldMatcher;
 import org.luckypray.dexkit.query.matchers.MethodMatcher;
 import org.luckypray.dexkit.result.MethodData;
 
@@ -50,10 +56,14 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
     private static final String CUSTOM_ITEM_MARKER = "zalo_xposed_settings";
     private static final int CUSTOM_DRAWABLE_ID = -6767;
     private static final int REQUEST_CODE_IMPORT_CONFIG = 3636;
+    private static final int REQUEST_CODE_PICK_FONT = 3737;
+    private static final int[] BACKUP_INTERVAL_OPTIONS = new int[]{1, 3, 6, 12};
     private static boolean isOpenZaloXposedSettings1 = false;
     private static boolean isOpenZaloXposedSettings2 = false;
     @SuppressLint("StaticFieldLeak")
     private static LinearLayout rootLayout = null;
+    private static Runnable backgroundSourceUiRefresher = null;
+    private static Runnable customFontUiRefresher = null;
     private static Class<?> headerTextViewClass = null;
     private TextView templateHeader = null;
     private View templateSeparator = null;
@@ -66,6 +76,9 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         RelativeLayout listItemSetting;
 
 
+        headerTitle = createHeaderTitle(context);
+        headerTitle.setText(Utils.IsEnglish() ? "Background" : "Hình nền");
+        rootLayout.addView(headerTitle);
         listItemSetting = ListItemSettingHelper.CreateNew(context);
         rootLayout.addView(listItemSetting);
         ListItemSettingHelper.SetIDTracking(listItemSetting, "");
@@ -73,6 +86,46 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         ListItemSettingHelper.SetTitle(listItemSetting, Utils.IsEnglish() ? "Custom background" : "Hình nền tuỳ chỉnh");
         ListItemSettingHelper.SetSwitch(listItemSetting, Config.getEnableBackground());
         ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setEnableBackground);
+
+        headerTitle = createHeaderTitle(context);
+        headerTitle.setText(Utils.IsEnglish() ? "Background source" : "Nguồn hình nền");
+        rootLayout.addView(headerTitle);
+
+        RelativeLayout bgAssetsItem = ListItemSettingHelper.CreateNew(context);
+        rootLayout.addView(bgAssetsItem);
+        ListItemSettingHelper.SetIDTracking(bgAssetsItem, "");
+        ListItemSettingHelper.ShowDivider(bgAssetsItem);
+        ListItemSettingHelper.SetTitle(bgAssetsItem, Utils.IsEnglish() ? "Built-in backgrounds" : "Hình nền có sẵn");
+        ListItemSettingHelper.SetSubtitle(bgAssetsItem, Utils.IsEnglish() ? "Bundled with ZaloXposed" : "Đi kèm ZaloXposed");
+
+        RelativeLayout bgPickerItem = ListItemSettingHelper.CreateNew(context);
+        rootLayout.addView(bgPickerItem);
+        ListItemSettingHelper.SetIDTracking(bgPickerItem, "");
+        ListItemSettingHelper.ShowDivider(bgPickerItem);
+        ListItemSettingHelper.SetTitle(bgPickerItem, Utils.IsEnglish() ? "Image from device" : "Ảnh từ máy");
+        ListItemSettingHelper.SetSubtitle(bgPickerItem, Utils.IsEnglish() ? "Android Photo Picker" : "Photo Picker của Android");
+
+        RelativeLayout bgFolderItem = ListItemSettingHelper.CreateNew(context);
+        rootLayout.addView(bgFolderItem);
+        ListItemSettingHelper.SetIDTracking(bgFolderItem, "");
+        ListItemSettingHelper.HideDivider(bgFolderItem);
+        ListItemSettingHelper.SetTitle(bgFolderItem, Utils.IsEnglish() ? "Folder " + BackgroundUtils.FOLDER_DISPLAY_PATH : "Thư mục " + BackgroundUtils.FOLDER_DISPLAY_PATH);
+
+        backgroundSourceUiRefresher = () -> updateBackgroundSourceItems(context, bgAssetsItem, bgPickerItem, bgFolderItem);
+        refreshBackgroundSourceUi();
+
+        ListItemSettingHelper.SetOnClickListener(bgAssetsItem, v ->
+        {
+            selectBackgroundSource(context, Config.BG_SOURCE_ASSETS);
+        });
+        ListItemSettingHelper.SetOnClickListener(bgPickerItem, v ->
+        {
+            openBackgroundPhotoPicker(context);
+        });
+        ListItemSettingHelper.SetOnClickListener(bgFolderItem, v ->
+        {
+            onFolderBackgroundClicked(context);
+        });
 
 
         separator = createSeparator(context);
@@ -288,6 +341,23 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         separator = createSeparator(context);
         rootLayout.addView(separator);
         headerTitle = createHeaderTitle(context);
+        headerTitle.setText(Utils.IsEnglish() ? "Chat reactions" : "Biểu cảm chat");
+        rootLayout.addView(headerTitle);
+        listItemSetting = ListItemSettingHelper.CreateNew(context);
+        rootLayout.addView(listItemSetting);
+        ListItemSettingHelper.SetIDTracking(listItemSetting, "");
+        ListItemSettingHelper.HideDivider(listItemSetting);
+        ListItemSettingHelper.SetTitle(listItemSetting, Utils.IsEnglish() ? "Unlock chat reactions" : "Mở khoá biểu cảm chat");
+        ListItemSettingHelper.SetSubtitle(listItemSetting, Utils.IsEnglish()
+            ? "Show the reaction picker without a subscription package"
+            : "Hiện bảng biểu cảm mà không cần gói đăng ký");
+        ListItemSettingHelper.SetSwitch(listItemSetting, Config.getUnlockChatReaction());
+        ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setUnlockChatReaction);
+
+
+        separator = createSeparator(context);
+        rootLayout.addView(separator);
+        headerTitle = createHeaderTitle(context);
         headerTitle.setText(Utils.IsEnglish() ? "User interface" : "Giao diện");
         rootLayout.addView(headerTitle);
         listItemSetting = ListItemSettingHelper.CreateNew(context);
@@ -316,6 +386,72 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         separator = createSeparator(context);
         rootLayout.addView(separator);
         headerTitle = createHeaderTitle(context);
+        headerTitle.setText(Utils.IsEnglish() ? "Custom font" : "Phông chữ tuỳ chỉnh");
+        rootLayout.addView(headerTitle);
+
+        RelativeLayout customFontEnableItem = ListItemSettingHelper.CreateNew(context);
+        rootLayout.addView(customFontEnableItem);
+        ListItemSettingHelper.SetIDTracking(customFontEnableItem, "");
+        ListItemSettingHelper.ShowDivider(customFontEnableItem);
+        ListItemSettingHelper.SetTitle(customFontEnableItem, Utils.IsEnglish() ? "Enable custom font" : "Kích hoạt phông chữ tuỳ chỉnh");
+        ListItemSettingHelper.SetSubtitle(customFontEnableItem, Utils.IsEnglish()
+            ? "Apply the selected font to Zalo text and chat"
+            : "Áp dụng phông chữ đã chọn cho văn bản và chat Zalo");
+        ListItemSettingHelper.SetSwitch(customFontEnableItem, Config.getCustomFontEnabled());
+        ListItemSettingHelper.SetCheckedChangeListener(customFontEnableItem, enabled ->
+        {
+            try
+            {
+                Config.setCustomFontEnabled(enabled);
+                if (enabled && !CustomFont.hasFont(context))
+                    showToast(context, Utils.IsEnglish()
+                        ? "Choose a font file below to finish enabling."
+                        : "Hãy chọn tệp phông chữ bên dưới để hoàn tất.");
+            }
+            catch (Exception e)
+            {
+                Logger.e(e);
+            }
+        });
+
+        RelativeLayout customFontFileItem = ListItemSettingHelper.CreateNew(context);
+        rootLayout.addView(customFontFileItem);
+        ListItemSettingHelper.SetIDTracking(customFontFileItem, "");
+        ListItemSettingHelper.ShowDivider(customFontFileItem);
+        ListItemSettingHelper.SetTitle(customFontFileItem, Utils.IsEnglish() ? "Font file" : "Tệp phông chữ");
+        ListItemSettingHelper.SetOnClickListener(customFontFileItem, v -> openFontPicker(context));
+
+        RelativeLayout customFontResetItem = ListItemSettingHelper.CreateNew(context);
+        rootLayout.addView(customFontResetItem);
+        ListItemSettingHelper.SetIDTracking(customFontResetItem, "");
+        ListItemSettingHelper.HideDivider(customFontResetItem);
+        ListItemSettingHelper.SetTitle(customFontResetItem, Utils.IsEnglish() ? "Reset custom font" : "Đặt lại phông chữ");
+        ListItemSettingHelper.SetSubtitle(customFontResetItem, Utils.IsEnglish()
+            ? "Remove the selected font and restore Zalo's default"
+            : "Xoá phông chữ đã chọn và khôi phục mặc định của Zalo");
+        ListItemSettingHelper.SetOnClickListener(customFontResetItem, v ->
+        {
+            try
+            {
+                CustomFont.reset(context);
+                refreshCustomFontUi();
+                showToast(context, Utils.IsEnglish()
+                    ? "Custom font removed. Restart Zalo to apply."
+                    : "Đã xoá phông chữ tuỳ chỉnh. Khởi động lại Zalo để áp dụng.");
+            }
+            catch (Exception e)
+            {
+                Logger.e(e);
+            }
+        });
+
+        customFontUiRefresher = () -> updateCustomFontItems(context, customFontEnableItem, customFontFileItem, customFontResetItem);
+        refreshCustomFontUi();
+
+
+        separator = createSeparator(context);
+        rootLayout.addView(separator);
+        headerTitle = createHeaderTitle(context);
         headerTitle.setText("ZCloud");
         rootLayout.addView(headerTitle);
         listItemSetting = ListItemSettingHelper.CreateNew(context);
@@ -336,11 +472,54 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         listItemSetting = ListItemSettingHelper.CreateNew(context);
         rootLayout.addView(listItemSetting);
         ListItemSettingHelper.SetIDTracking(listItemSetting, "");
-        ListItemSettingHelper.HideDivider(listItemSetting);
+        ListItemSettingHelper.ShowDivider(listItemSetting);
         ListItemSettingHelper.SetTitle(listItemSetting, Utils.IsEnglish() ? "Restore Google Drive backup options" : "Phục hồi tuỳ chọn sao lưu ảnh bằng Google Drive");
         ListItemSettingHelper.SetSubtitle(listItemSetting, Utils.IsEnglish() ? "Replace the ZCloud backup options" : "Thay thế tuỳ chọn sao lưu bằng ZCloud");
         ListItemSettingHelper.SetSwitch(listItemSetting, Config.getRestoreGoogleDriveBackup());
         ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setRestoreGoogleDriveBackup);
+
+        RelativeLayout backupIntervalItem = ListItemSettingHelper.CreateNew(context);
+        RelativeLayout backupIntervalToggle = ListItemSettingHelper.CreateNew(context);
+        rootLayout.addView(backupIntervalToggle);
+        ListItemSettingHelper.SetIDTracking(backupIntervalToggle, "");
+        ListItemSettingHelper.ShowDivider(backupIntervalToggle);
+        ListItemSettingHelper.SetTitle(backupIntervalToggle, Utils.IsEnglish() ? "Custom backup interval" : "Chu kỳ sao lưu tuỳ chỉnh");
+        ListItemSettingHelper.SetSubtitle(backupIntervalToggle, Utils.IsEnglish()
+            ? "Override the automatic server backup interval"
+            : "Ghi đè chu kỳ sao lưu tự động của máy chủ");
+        ListItemSettingHelper.SetSwitch(backupIntervalToggle, Config.getEnableBackupInterval());
+        ListItemSettingHelper.SetCheckedChangeListener(backupIntervalToggle, enabled ->
+        {
+            try
+            {
+                Config.setEnableBackupInterval(enabled);
+                updateBackupIntervalAvailability(backupIntervalItem, enabled);
+            }
+            catch (Exception e)
+            {
+                Logger.e(e);
+            }
+        });
+
+        rootLayout.addView(backupIntervalItem);
+        ListItemSettingHelper.SetIDTracking(backupIntervalItem, "");
+        ListItemSettingHelper.HideDivider(backupIntervalItem);
+        ListItemSettingHelper.SetTitle(backupIntervalItem, Utils.IsEnglish() ? "Backup interval" : "Chu kỳ sao lưu");
+        updateBackupIntervalRow(backupIntervalItem, Config.getBackupIntervalHours());
+        updateBackupIntervalAvailability(backupIntervalItem, Config.getEnableBackupInterval());
+        ListItemSettingHelper.SetOnClickListener(backupIntervalItem, v ->
+        {
+            try
+            {
+                int next = nextBackupIntervalHours(Config.getBackupIntervalHours());
+                Config.setBackupIntervalHours(next);
+                updateBackupIntervalRow(backupIntervalItem, next);
+            }
+            catch (Exception e)
+            {
+                Logger.e(e);
+            }
+        });
 
 
         separator = createSeparator(context);
@@ -351,11 +530,33 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         listItemSetting = ListItemSettingHelper.CreateNew(context);
         rootLayout.addView(listItemSetting);
         ListItemSettingHelper.SetIDTracking(listItemSetting, "");
-        ListItemSettingHelper.HideDivider(listItemSetting);
+        ListItemSettingHelper.ShowDivider(listItemSetting);
         ListItemSettingHelper.SetTitle(listItemSetting, Utils.IsEnglish() ? "Restore profile music options" : "Phục hồi tuỳ chọn nhạc nền hồ sơ");
         ListItemSettingHelper.SetSubtitle(listItemSetting, Utils.IsEnglish() ? "Replace the ZStyle profile music options" : "Thay thế tuỳ chọn chọn nhạc nền hồ sơ bằng ZStyle");
         ListItemSettingHelper.SetSwitch(listItemSetting, Config.getRestoreProfileMusic());
         ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setRestoreProfileMusic);
+
+        RelativeLayout avatarSavingItem = ListItemSettingHelper.CreateNew(context);
+        rootLayout.addView(avatarSavingItem);
+        ListItemSettingHelper.SetIDTracking(avatarSavingItem, "");
+        ListItemSettingHelper.ShowDivider(avatarSavingItem);
+        ListItemSettingHelper.SetTitle(avatarSavingItem, Utils.IsEnglish() ? "Allow saving profile avatars" : "Cho phép lưu ảnh đại diện hồ sơ");
+        ListItemSettingHelper.SetSubtitle(avatarSavingItem, Utils.IsEnglish()
+            ? "Restore the avatar save action and screenshots"
+            : "Khôi phục nút lưu ảnh và chụp màn hình ảnh đại diện");
+        ListItemSettingHelper.SetSwitch(avatarSavingItem, Config.getEnableAvatarSaving());
+        ListItemSettingHelper.SetCheckedChangeListener(avatarSavingItem, Config::setEnableAvatarSaving);
+
+        RelativeLayout coverSavingItem = ListItemSettingHelper.CreateNew(context);
+        rootLayout.addView(coverSavingItem);
+        ListItemSettingHelper.SetIDTracking(coverSavingItem, "");
+        ListItemSettingHelper.HideDivider(coverSavingItem);
+        ListItemSettingHelper.SetTitle(coverSavingItem, Utils.IsEnglish() ? "Allow saving profile cover photos" : "Cho phép lưu ảnh bìa hồ sơ");
+        ListItemSettingHelper.SetSubtitle(coverSavingItem, Utils.IsEnglish()
+            ? "Restore the cover save action and screenshots"
+            : "Khôi phục nút lưu ảnh và chụp màn hình ảnh bìa");
+        ListItemSettingHelper.SetSwitch(coverSavingItem, Config.getEnableCoverSaving());
+        ListItemSettingHelper.SetCheckedChangeListener(coverSavingItem, Config::setEnableCoverSaving);
 
     
         separator = createSeparator(context);
@@ -490,6 +691,386 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         }
     }
 
+    private static void refreshBackgroundSourceUi()
+    {
+        if (backgroundSourceUiRefresher == null)
+            return;
+        try
+        {
+            backgroundSourceUiRefresher.run();
+        }
+        catch (Exception e)
+        {
+            Logger.e(e);
+        }
+    }
+
+    private static void updateBackupIntervalRow(RelativeLayout item, int hours) throws Exception
+    {
+        String state;
+        if (Utils.IsEnglish())
+            state = hours + (hours == 1 ? " hour" : " hours");
+        else
+            state = hours + " giờ";
+        ListItemSettingHelper.SetStateSetting(item, state);
+    }
+
+    private static void updateBackupIntervalAvailability(RelativeLayout item, boolean enabled) throws Exception
+    {
+        ListItemSettingHelper.SetEnabled(item, enabled);
+        item.setAlpha(enabled ? 1f : 0.5f);
+    }
+
+    private static int nextBackupIntervalHours(int current)
+    {
+        for (int i = 0; i < BACKUP_INTERVAL_OPTIONS.length; i++)
+        {
+            if (BACKUP_INTERVAL_OPTIONS[i] == current)
+                return BACKUP_INTERVAL_OPTIONS[(i + 1) % BACKUP_INTERVAL_OPTIONS.length];
+        }
+        return BACKUP_INTERVAL_OPTIONS[0];
+    }
+
+    private static void refreshCustomFontUi()
+    {
+        if (customFontUiRefresher == null)
+            return;
+        try
+        {
+            customFontUiRefresher.run();
+        }
+        catch (Exception e)
+        {
+            Logger.e(e);
+        }
+    }
+
+    private void updateCustomFontItems(Context context, RelativeLayout enableItem, RelativeLayout fontItem, RelativeLayout resetItem)
+    {
+        try
+        {
+            boolean hasFont = CustomFont.hasFont(context);
+            String displayName = CustomFont.getDisplayName(context);
+            ListItemSettingHelper.SetSwitch(enableItem, Config.getCustomFontEnabled());
+            ListItemSettingHelper.SetStateSetting(fontItem,
+                hasFont && !displayName.isEmpty()
+                    ? displayName
+                    : (Utils.IsEnglish() ? "Not selected" : "Chưa chọn"));
+            ListItemSettingHelper.SetSubtitle(fontItem, hasFont
+                ? (Utils.IsEnglish()
+                    ? "Tap to choose a different .ttf, .otf or .ttc file"
+                    : "Chạm để chọn tệp .ttf, .otf hoặc .ttc khác")
+                : (Utils.IsEnglish()
+                    ? "Tap to choose a .ttf, .otf or .ttc file"
+                    : "Chạm để chọn tệp .ttf, .otf hoặc .ttc"));
+            ListItemSettingHelper.SetEnabled(resetItem, hasFont);
+            resetItem.setAlpha(hasFont ? 1f : 0.5f);
+        }
+        catch (Exception e)
+        {
+            Logger.e(e);
+        }
+    }
+
+    private void updateBackgroundSourceItems(Context context, RelativeLayout assetsItem, RelativeLayout pickerItem, RelativeLayout folderItem)
+    {
+        try
+        {
+            String source = Config.getBackgroundSource();
+            String inUse = Utils.IsEnglish() ? "In use" : "Đang dùng";
+            ListItemSettingHelper.SetStateSetting(assetsItem, Config.BG_SOURCE_ASSETS.equals(source) ? inUse : "");
+            ListItemSettingHelper.SetStateSetting(pickerItem, Config.BG_SOURCE_PICKER.equals(source) ? inUse : "");
+            ListItemSettingHelper.SetStateSetting(folderItem, Config.BG_SOURCE_FOLDER.equals(source) ? inUse : "");
+
+            boolean hasPickedImage = BackgroundUtils.hasPickedImage(context);
+            String pickerSubtitle;
+            if (Utils.IsEnglish())
+                pickerSubtitle = hasPickedImage ? "Photo Picker - tap to choose another image" : "Photo Picker - tap to choose an image";
+            else
+                pickerSubtitle = hasPickedImage ? "Photo Picker - chạm để chọn ảnh khác" : "Photo Picker - chạm để chọn ảnh";
+            ListItemSettingHelper.SetSubtitle(pickerItem, pickerSubtitle);
+
+            BackgroundUtils.FolderAccess access = BackgroundUtils.getFolderAccess(context);
+            String folderSubtitle = BackgroundUtils.FOLDER_DISPLAY_PATH;
+            if (access == BackgroundUtils.FolderAccess.NOT_DECLARED)
+                folderSubtitle += Utils.IsEnglish()
+                    ? " - unavailable: Zalo does not declare storage access"
+                    : " - không khả dụng: Zalo không khai báo quyền bộ nhớ";
+            else if (access != BackgroundUtils.FolderAccess.GRANTED)
+                folderSubtitle += Utils.IsEnglish()
+                    ? " - tap to grant storage access"
+                    : " - chạm để cấp quyền bộ nhớ";
+            ListItemSettingHelper.SetSubtitle(folderItem, folderSubtitle);
+
+            boolean folderUsable = access != BackgroundUtils.FolderAccess.NOT_DECLARED;
+            ListItemSettingHelper.SetEnabled(folderItem, folderUsable);
+            folderItem.setAlpha(folderUsable ? 1f : 0.5f);
+        }
+        catch (Exception e)
+        {
+            Logger.e(e);
+        }
+    }
+
+    private void selectBackgroundSource(Context context, String source)
+    {
+        boolean changed = !source.equals(Config.getBackgroundSource());
+        Config.setBackgroundSource(source);
+        refreshBackgroundSourceUi();
+        if (changed)
+            showToast(context, Utils.IsEnglish()
+                ? "Background source changed. Restart Zalo to apply."
+                : "Đã đổi nguồn hình nền. Khởi động lại Zalo để áp dụng.");
+    }
+
+    private void openBackgroundPhotoPicker(Context context)
+    {
+        Activity activity = BackgroundUtils.findActivity(context);
+        if (activity == null)
+        {
+            showToast(context, Utils.IsEnglish() ? "Cannot open Photo Picker!" : "Không thể mở Photo Picker!");
+            return;
+        }
+        try
+        {
+            Intent intent = new Intent("android.provider.action.PICK_IMAGES");
+            intent.setType("image/*");
+            activity.startActivityForResult(intent, BackgroundUtils.REQUEST_CODE_PICK_IMAGE);
+            return;
+        }
+        catch (ActivityNotFoundException e)
+        {
+            Logger.i("Android Photo Picker not available, using document picker");
+        }
+        catch (Exception e)
+        {
+            Logger.e(e);
+        }
+        try
+        {
+            Intent fallback = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+            fallback.addCategory(Intent.CATEGORY_OPENABLE);
+            fallback.setType("image/*");
+            activity.startActivityForResult(fallback, BackgroundUtils.REQUEST_CODE_PICK_IMAGE);
+        }
+        catch (Exception e)
+        {
+            Logger.e(e);
+            showToast(context, Utils.IsEnglish() ? "No image picker available!" : "Không có trình chọn ảnh khả dụng!");
+        }
+    }
+
+    private void openFontPicker(Context context)
+    {
+        Activity activity = BackgroundUtils.findActivity(context);
+        if (activity == null)
+        {
+            showToast(context, Utils.IsEnglish() ? "Cannot open the font picker!" : "Không thể mở trình chọn phông chữ!");
+            return;
+        }
+        try
+        {
+            Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+            intent.addCategory(Intent.CATEGORY_OPENABLE);
+            intent.setType("*/*");
+            intent.putExtra(Intent.EXTRA_MIME_TYPES, new String[]{
+                "font/ttf",
+                "font/otf",
+                "font/collection",
+                "application/x-font-ttf",
+                "application/x-font-opentype",
+                "application/vnd.ms-opentype",
+                "application/octet-stream"
+            });
+            activity.startActivityForResult(intent, REQUEST_CODE_PICK_FONT);
+        }
+        catch (Exception e)
+        {
+            Logger.e(e);
+            showToast(context, Utils.IsEnglish() ? "No font picker available!" : "Không có trình chọn phông chữ khả dụng!");
+        }
+    }
+
+    private void handlePickedFont(Context context, Uri uri)
+    {
+        new Thread(() ->
+        {
+            boolean success = CustomFont.importFont(context, uri);
+            new Handler(Looper.getMainLooper()).post(() ->
+            {
+                if (success)
+                {
+                    refreshCustomFontUi();
+                    showToast(context, Utils.IsEnglish()
+                        ? "Font selected. Restart Zalo to apply everywhere."
+                        : "Đã chọn phông chữ. Khởi động lại Zalo để áp dụng toàn bộ.");
+                }
+                else
+                    showToast(context, Utils.IsEnglish()
+                        ? "Invalid or unreadable font file!"
+                        : "Tệp phông chữ không hợp lệ hoặc không đọc được!");
+            });
+        }, "ZaloXposed-FontPicker").start();
+    }
+
+    private void onFolderBackgroundClicked(Context context) {
+        try {
+            BackgroundUtils.FolderAccess access =
+                    BackgroundUtils.getFolderAccess(context);
+    
+            if (access == BackgroundUtils.FolderAccess.NOT_DECLARED) {
+                showToast(context, Utils.IsEnglish()
+                        ? "Required storage permission is not declared."
+                        : "Ứng dụng chưa khai báo quyền truy cập bộ nhớ cần thiết.");
+                return;
+            }
+    
+            if (access != BackgroundUtils.FolderAccess.GRANTED) {
+                showToast(context, Utils.IsEnglish()
+                        ? "Please grant access to the background folder first."
+                        : "Vui lòng cấp quyền truy cập thư mục hình nền trước.");
+    
+                boolean requested = BackgroundUtils.requestFolderAccess(context);
+    
+                if (!requested) {
+                    showToast(context, Utils.IsEnglish()
+                            ? "Cannot request folder access. Please check app settings."
+                            : "Không thể yêu cầu quyền. Vui lòng kiểm tra cài đặt ứng dụng.");
+                }
+                return;
+            }
+    
+            File folder = new File(BackgroundUtils.FOLDER_DISPLAY_PATH);
+    
+            if (!folder.exists()) {
+                if (!folder.mkdirs() && !folder.isDirectory()) {
+                    showToast(context, Utils.IsEnglish()
+                            ? "Cannot create folder: " + folder.getAbsolutePath()
+                            : "Không thể tạo thư mục: " + folder.getAbsolutePath());
+                    return;
+                }
+            }
+    
+            if (!folder.isDirectory() || !folder.canRead()) {
+                showToast(context, Utils.IsEnglish()
+                        ? "Cannot read the background folder."
+                        : "Không thể đọc thư mục hình nền.");
+                return;
+            }
+    
+            if (BackgroundUtils.getFolderImages().isEmpty()) {
+                showToast(context, Utils.IsEnglish()
+                        ? "Folder is ready: " + folder.getAbsolutePath()
+                            + ". Add images to use this source."
+                        : "Thư mục đã sẵn sàng: " + folder.getAbsolutePath()
+                            + ". Hãy thêm ảnh để sử dụng.");
+                return;
+            }
+    
+            selectBackgroundSource(context, Config.BG_SOURCE_FOLDER);
+    
+        } catch (SecurityException e) {
+            Logger.e(e);
+            showToast(context, Utils.IsEnglish()
+                    ? "Storage access denied."
+                    : "Không có quyền truy cập bộ nhớ.");
+        } catch (Throwable e) {
+            Logger.e(e);
+            showToast(context, Utils.IsEnglish()
+                    ? "Cannot access the background folder."
+                    : "Không thể truy cập thư mục hình nền.");
+        }
+    }
+
+    private void handlePickedBackground(Context context, Uri uri)
+    {
+        new Thread(() ->
+        {
+            boolean success = BackgroundUtils.savePickedImage(context, uri);
+            new Handler(Looper.getMainLooper()).post(() ->
+            {
+                if (success)
+                {
+                    Config.setBackgroundSource(Config.BG_SOURCE_PICKER);
+                    refreshBackgroundSourceUi();
+                    showToast(context, Utils.IsEnglish()
+                        ? "Image selected. Restart Zalo to apply."
+                        : "Đã chọn ảnh. Khởi động lại Zalo để áp dụng.");
+                }
+                else
+                    showToast(context, Utils.IsEnglish() ? "Failed to load the selected image!" : "Không thể đọc ảnh đã chọn!");
+            });
+        }, "ZaloXposed-BgPicker").start();
+    }
+
+    private void showToast(Context context, String message)
+    {
+        new Handler(Looper.getMainLooper()).post(() -> Toast.makeText(context, message, Toast.LENGTH_SHORT).show());
+    }
+
+    private void handleFolderAccessResult(Activity activity) {
+        if (activity == null)
+            return;
+    
+        try {
+            if (BackgroundUtils.onFolderAccessResult(activity)) {
+                Config.setBackgroundSource(Config.BG_SOURCE_FOLDER);
+                refreshBackgroundSourceUi();
+    
+                showToast(activity, Utils.IsEnglish()
+                    ? "Storage access granted. Restart Zalo to apply."
+                    : "Đã cấp quyền và thư mục đã sẵn sàng. Khởi động lại Zalo để áp dụng.");
+            } else {
+                refreshBackgroundSourceUi();
+    
+                showToast(activity, Utils.IsEnglish()
+                    ? "Storage access was not granted."
+                    : "Chưa được cấp quyền truy cập thư mục.");
+            }
+        } catch (Throwable e) {
+            Logger.e(e);
+        }
+    }
+
+    private boolean isStoragePermission(String[] permissions)
+    {
+        if (permissions == null)
+            return false;
+        for (String permission : permissions)
+        {
+            if (Manifest.permission.READ_EXTERNAL_STORAGE.equals(permission)
+                || Manifest.permission.READ_MEDIA_IMAGES.equals(permission)
+                || Manifest.permission.MANAGE_EXTERNAL_STORAGE.equals(permission))
+                return true;
+        }
+        return false;
+    }
+
+    private void hookActivityForPermissionResult()
+    {
+        try
+        {
+            Method method = Activity.class.getDeclaredMethod("onRequestPermissionsResult", int.class, String[].class, int[].class);
+            Logger.i("Hooking: " + method);
+            module.hook(method).setPriority(10).intercept(chain ->
+            {
+                int requestCode = (int)chain.getArg(0);
+                String[] permissions = (String[])chain.getArg(1);
+                if (requestCode == BackgroundUtils.REQUEST_CODE_PERMISSION
+                    && isStoragePermission(permissions)) {
+                    Activity activity = (Activity) chain.getThisObject();
+                
+                    handleFolderAccessResult(activity);
+                }
+                return chain.proceed();
+            });
+        }
+        catch (Exception e)
+        {
+            Logger.e(e);
+        }
+    }
+
     @Override
     public void hook() throws Throwable
     {
@@ -500,6 +1081,7 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         hookTabMeView();
         hookSettingPrivateView();
         hookActivityForFilePicker();
+        hookActivityForPermissionResult();
         List<MethodData> methods = bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
                 .declaredClass("com.zing.zalo.ui.maintab.me.TabMeView")
@@ -654,6 +1236,29 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
                     Activity activity = (Activity)chain.getThisObject();
                     if (resultCode == Activity.RESULT_OK && data != null && data.getData() != null)
                         handleImportUri(activity, data.getData());
+                    return null;
+                }
+                if (requestCode == REQUEST_CODE_PICK_FONT)
+                {
+                    int resultCode = (int)chain.getArg(1);
+                    Intent data = (Intent)chain.getArg(2);
+                    Activity activity = (Activity)chain.getThisObject();
+                    if (resultCode == Activity.RESULT_OK && data != null && data.getData() != null)
+                        handlePickedFont(activity, data.getData());
+                    return null;
+                }
+                if (requestCode == BackgroundUtils.REQUEST_CODE_PICK_IMAGE)
+                {
+                    int resultCode = (int)chain.getArg(1);
+                    Intent data = (Intent)chain.getArg(2);
+                    Activity activity = (Activity)chain.getThisObject();
+                    if (resultCode == Activity.RESULT_OK && data != null && data.getData() != null)
+                        handlePickedBackground(activity, data.getData());
+                    return null;
+                }
+                if (requestCode == BackgroundUtils.REQUEST_CODE_MANAGE_STORAGE) {
+                    Activity activity = (Activity) chain.getThisObject();
+                    handleFolderAccessResult(activity);
                     return null;
                 }
                 return chain.proceed();
@@ -830,7 +1435,11 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
             if (isOpenZaloXposedSettings1 || isOpenZaloXposedSettings2)
                 rootLayout = (LinearLayout)chain.getArg(1);
             else 
+            {
                 rootLayout = null;
+                backgroundSourceUiRefresher = null;
+                customFontUiRefresher = null;
+            }
             return result;
         });
         methods = bridge.findMethod(FindMethod.create()

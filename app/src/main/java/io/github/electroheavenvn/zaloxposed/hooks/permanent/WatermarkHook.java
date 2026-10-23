@@ -46,7 +46,7 @@ public class WatermarkHook extends BaseHook
                 return result;
             if (actionEditTextView.getHint().length() <= 0)
                 return result;
-            actionEditTextView.setHint(MorpheConstants.getModuleName() + " by ElectroHeavenVN");
+            // Remove watermark
             return result;
         });
     }

@@ -76,6 +76,10 @@ public class ZaloXposedLoader extends XposedModule
         hooks.add(new SilentTypingHook());
         hooks.add(new BlockSendSeenHook());
         hooks.add(new ExtendedGroupRightMenuHook());
+        hooks.add(new UnlockChatReactionHook());
+        hooks.add(new BackupIntervalHook());
+        hooks.add(new AvatarCoverSavingHook());
+        hooks.add(new CustomFontHook());
 
         hooks.add(new TestHook());
 

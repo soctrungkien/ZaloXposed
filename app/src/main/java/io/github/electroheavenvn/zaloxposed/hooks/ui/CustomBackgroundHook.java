@@ -1,5 +1,6 @@
 package io.github.electroheavenvn.zaloxposed.hooks.ui;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
@@ -8,6 +9,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
+import io.github.electroheavenvn.zaloxposed.utilities.BackgroundUtils;
 import io.github.electroheavenvn.zaloxposed.utilities.Config;
 import io.github.electroheavenvn.zaloxposed.utilities.Logger;
 
@@ -65,7 +67,7 @@ public class CustomBackgroundHook extends BaseHook
                     Logger.i("Background already added");
                     return result;
                 }
-                Bitmap bg = loadBg();
+                Bitmap bg = loadBg(root.getContext());
                 if (bg == null)
                 {
                     Logger.e("Failed to load background");
@@ -82,7 +84,40 @@ public class CustomBackgroundHook extends BaseHook
         }
     }
 
-    private Bitmap loadBg()
+    private Bitmap loadBg(Context context)
+    {
+        String source = Config.getBackgroundSource();
+        if (Config.BG_SOURCE_FOLDER.equals(source))
+        {
+            List<java.io.File> files = BackgroundUtils.getFolderImages();
+            if (!files.isEmpty())
+            {
+                java.io.File file = files.get(random.nextInt(files.size()));
+                Bitmap bitmap = BitmapFactory.decodeFile(file.getAbsolutePath());
+                if (bitmap != null)
+                    return bitmap;
+                Logger.e("Error loading background from folder: " + file.getAbsolutePath());
+            }
+            else
+                Logger.e("No wallpapers found in " + BackgroundUtils.FOLDER_DISPLAY_PATH);
+        }
+        else if (Config.BG_SOURCE_PICKER.equals(source))
+        {
+            java.io.File file = BackgroundUtils.getPickedImageFile(context);
+            if (file.exists() && file.isFile())
+            {
+                Bitmap bitmap = BitmapFactory.decodeFile(file.getAbsolutePath());
+                if (bitmap != null)
+                    return bitmap;
+                Logger.e("Error loading picked background");
+            }
+            else
+                Logger.e("No picked background found");
+        }
+        return loadAssetBg();
+    }
+
+    private Bitmap loadAssetBg()
     {
         String[] bgImgs = new String[0];
         try

@@ -22,7 +22,7 @@
         android:shadowDx="0"
         android:shadowDy="1"
         android:shadowRadius="2"
-        android:text="Developed by ElectroHeavenVN"
+        android:text=""
         android:textColor="#FFFFFF"
         android:textSize="20sp"
         android:textStyle="bold"
