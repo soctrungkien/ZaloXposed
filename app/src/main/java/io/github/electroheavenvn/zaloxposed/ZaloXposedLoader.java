@@ -80,15 +80,15 @@ public class ZaloXposedLoader extends XposedModule
         hooks.add(new BackupIntervalHook());
         hooks.add(new AvatarCoverSavingHook());
         hooks.add(new CustomFontHook());
+        hooks.add(new DownloadMediaHook());
+        hooks.add(new BlockScreenEffectHook());
+        hooks.add(new LiquidTabHook());
 
         hooks.add(new TestHook());
 
-        if (MorpheConstants.isPatchedByMorphe())
-        {
-            hooks.add(new SpoofAppSignatureHook());
-            hooks.add(new SpoofPackageNameHook());
-            hooks.add(new FixProviderHook());
-        }
+        hooks.add(new SpoofAppSignatureHook());
+        hooks.add(new SpoofPackageNameHook());
+        hooks.add(new FixProviderHook());
     }
 
     @SuppressWarnings("deprecation")

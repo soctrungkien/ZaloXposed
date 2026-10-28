@@ -728,4 +728,52 @@ public final class Config
     {
         set(KEY_CUSTOM_FONT_NAME, value == null ? "" : value);
     }
+
+    public static final String KEY_ENABLE_DOWNLOAD = "enable_download";
+
+    public static boolean getEnableDownload()
+    {
+        return (boolean)get(KEY_ENABLE_DOWNLOAD, false);
+    }
+
+    public static void setEnableDownload(boolean value)
+    {
+        set(KEY_ENABLE_DOWNLOAD, value);
+    }
+
+    public static final String KEY_BLOCK_MESSAGE_EFFECT = "block_message_effect";
+
+    public static boolean getBlockMessageEffect()
+    {
+        return (boolean)get(KEY_BLOCK_MESSAGE_EFFECT, false);
+    }
+
+    public static void setBlockMessageEffect(boolean value)
+    {
+        set(KEY_BLOCK_MESSAGE_EFFECT, value);
+    }
+
+    public static final String KEY_BLOCK_STICKER_EFFECT = "block_sticker_effect";
+
+    public static boolean getBlockStickerEffect()
+    {
+        return (boolean)get(KEY_BLOCK_STICKER_EFFECT, false);
+    }
+
+    public static void setBlockStickerEffect(boolean value)
+    {
+        set(KEY_BLOCK_STICKER_EFFECT, value);
+    }
+
+    public static final String KEY_ENABLE_LIQUID_UI = "enable_liquid_ui";
+
+    public static boolean getEnableLiquidUI()
+    {
+        return (boolean)get(KEY_ENABLE_LIQUID_UI, false);
+    }
+
+    public static void setEnableLiquidUI(boolean value)
+    {
+        set(KEY_ENABLE_LIQUID_UI, value);
+    }
 }

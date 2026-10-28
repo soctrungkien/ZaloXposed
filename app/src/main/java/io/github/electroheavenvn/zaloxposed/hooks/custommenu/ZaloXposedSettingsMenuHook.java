@@ -257,6 +257,23 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         separator = createSeparator(context);
         rootLayout.addView(separator);
         headerTitle = createHeaderTitle(context);
+        headerTitle.setText(Utils.IsEnglish() ? "Media" : "Phương tiện");
+        rootLayout.addView(headerTitle);
+        listItemSetting = ListItemSettingHelper.CreateNew(context);
+        rootLayout.addView(listItemSetting);
+        ListItemSettingHelper.SetIDTracking(listItemSetting, "");
+        ListItemSettingHelper.HideDivider(listItemSetting);
+        ListItemSettingHelper.SetTitle(listItemSetting, Utils.IsEnglish() ? "Enable media download" : "Bật tải media");
+        ListItemSettingHelper.SetSubtitle(listItemSetting, Utils.IsEnglish()
+            ? "Add Download to story, photo and video menus. Files are saved to Pictures/Zalo and Movies/Zalo."
+            : "Thêm nút Tải xuống vào menu story, ảnh và video. Tệp được lưu vào Pictures/Zalo và Movies/Zalo.");
+        ListItemSettingHelper.SetSwitch(listItemSetting, Config.getEnableDownload());
+        ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setEnableDownload);
+
+
+        separator = createSeparator(context);
+        rootLayout.addView(separator);
+        headerTitle = createHeaderTitle(context);
         headerTitle.setText(Utils.IsEnglish() ? "Logging and tracking" : "Ghi nhật ký và theo dõi");
         rootLayout.addView(headerTitle);
         listItemSetting = ListItemSettingHelper.CreateNew(context);
@@ -341,6 +358,33 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         separator = createSeparator(context);
         rootLayout.addView(separator);
         headerTitle = createHeaderTitle(context);
+        headerTitle.setText(Utils.IsEnglish() ? "Screen effects" : "Hiệu ứng màn hình");
+        rootLayout.addView(headerTitle);
+        listItemSetting = ListItemSettingHelper.CreateNew(context);
+        rootLayout.addView(listItemSetting);
+        ListItemSettingHelper.SetIDTracking(listItemSetting, "");
+        ListItemSettingHelper.ShowDivider(listItemSetting);
+        ListItemSettingHelper.SetTitle(listItemSetting, Utils.IsEnglish() ? "Block message effects" : "Chặn hiệu ứng tin nhắn");
+        ListItemSettingHelper.SetSubtitle(listItemSetting, Utils.IsEnglish()
+            ? "Stop full-screen message animations. Restart Zalo to apply."
+            : "Tắt hiệu ứng toàn màn hình khi nhắn tin. Khởi động lại Zalo để áp dụng.");
+        ListItemSettingHelper.SetSwitch(listItemSetting, Config.getBlockMessageEffect());
+        ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setBlockMessageEffect);
+        listItemSetting = ListItemSettingHelper.CreateNew(context);
+        rootLayout.addView(listItemSetting);
+        ListItemSettingHelper.SetIDTracking(listItemSetting, "");
+        ListItemSettingHelper.HideDivider(listItemSetting);
+        ListItemSettingHelper.SetTitle(listItemSetting, Utils.IsEnglish() ? "Block sticker effects" : "Chặn hiệu ứng sticker");
+        ListItemSettingHelper.SetSubtitle(listItemSetting, Utils.IsEnglish()
+            ? "Stop sticker overlays and punch-glass effects. Restart Zalo to apply."
+            : "Tắt hiệu ứng sticker toàn màn hình và hiệu ứng punch-glass. Khởi động lại Zalo để áp dụng.");
+        ListItemSettingHelper.SetSwitch(listItemSetting, Config.getBlockStickerEffect());
+        ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setBlockStickerEffect);
+
+
+        separator = createSeparator(context);
+        rootLayout.addView(separator);
+        headerTitle = createHeaderTitle(context);
         headerTitle.setText(Utils.IsEnglish() ? "Chat reactions" : "Biểu cảm chat");
         rootLayout.addView(headerTitle);
         listItemSetting = ListItemSettingHelper.CreateNew(context);
@@ -381,6 +425,16 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         ListItemSettingHelper.SetTitle(listItemSetting, Utils.IsEnglish() ? "Enable extended group settings menu" : "Kích hoạt menu cài đặt nhóm mở rộng");
         ListItemSettingHelper.SetSwitch(listItemSetting, Config.getEnableExtendedGroupSettingMenu());
         ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setEnableExtendedGroupSettingMenu);
+        listItemSetting = ListItemSettingHelper.CreateNew(context);
+        rootLayout.addView(listItemSetting);
+        ListItemSettingHelper.SetIDTracking(listItemSetting, "");
+        ListItemSettingHelper.HideDivider(listItemSetting);
+        ListItemSettingHelper.SetTitle(listItemSetting, Utils.IsEnglish() ? "Liquid tab bar" : "Thanh tab dạng lỏng");
+        ListItemSettingHelper.SetSubtitle(listItemSetting, Utils.IsEnglish()
+            ? "Floating rounded tabs with a sliding highlight."
+            : "Thanh tab nổi bo tròn với hiệu ứng trượt.");
+        ListItemSettingHelper.SetSwitch(listItemSetting, Config.getEnableLiquidUI());
+        ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setEnableLiquidUI);
 
 
         separator = createSeparator(context);
