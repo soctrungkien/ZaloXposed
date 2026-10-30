@@ -26,9 +26,7 @@ Some features include:
 - **Hide ads:** Removes various advertisements and promotional content from the app.
 - **Hide typing indicators and "Seen" status:** Blocks sending typing and read receipts.
 - **Restore hidden features:** Brings back removed features like profile music, Google Drive backup, etc.
-- **Media download:** Adds Download actions to stories, photos, videos and timeline posts, saving to `Pictures/Zalo` and `Movies/Zalo` (JPEG XL images are converted when possible).
-- **Screen effects:** Blocks full-screen message effects and sticker/punch-glass effects.
-- **UI/UX enhancements:** Custom backgrounds, extended menus, Mini Chat, liquid tab bar, and more.
+- **UI/UX enhancements:** Custom backgrounds, extended menus, Mini Chat, and more.
 - **Unlock premium features:** Unlocks certain premium features without payment. 
 
 ## How to use

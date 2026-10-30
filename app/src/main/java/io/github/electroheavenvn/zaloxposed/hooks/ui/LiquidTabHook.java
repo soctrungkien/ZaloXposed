@@ -1,20 +1,15 @@
 package io.github.electroheavenvn.zaloxposed.hooks.ui;
 
 import android.content.Context;
-import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.InsetDrawable;
 import android.util.AttributeSet;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.Collections;
-import java.util.Set;
-import java.util.WeakHashMap;
 
 import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
 import io.github.electroheavenvn.zaloxposed.utilities.Config;
@@ -29,8 +24,6 @@ public class LiquidTabHook extends BaseHook
     private static final String FRAME_LAYOUT = "com.zing.zalo.uicontrol.MainTabFrameLayout";
     private static final String CUSTOM_MAIN_TAB = "com.zing.zalo.ui.maintab.widget.CustomMainTab";
     private static final String TAB_MAIN_VIEW = "com.zing.zalo.ui.maintab.widget.CustomMainTab$TabMainView";
-    private static final Set<View> PRESS_STYLED = Collections.newSetFromMap(
-        Collections.synchronizedMap(new WeakHashMap<View, Boolean>()));
 
     @Override
     public void hook() throws Throwable
@@ -114,22 +107,12 @@ public class LiquidTabHook extends BaseHook
             view.setOutlineProvider(null);
             view.setElevation(0f);
             view.setTranslationZ(1f);
-            view.setClipToOutline(false);
 
-            boolean night = (context.getResources().getConfiguration().uiMode
-                & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES;
-            GradientDrawable shell = new GradientDrawable(
-                GradientDrawable.Orientation.TOP_BOTTOM,
-                new int[]{
-                    night ? 0x70343B44 : 0xC7FFFFFF,
-                    night ? 0xA81C2229 : 0xEAF2F7FF
-                });
-            shell.setShape(GradientDrawable.RECTANGLE);
-            shell.setCornerRadius(dp(context, 28));
-            shell.setStroke(Math.max(1, dp(context, 1)),
-                night ? 0x40FFFFFF : 0x80FFFFFF);
-            view.setBackground(shell);
-            view.setElevation(dp(context, 10));
+            if (!(view.getBackground() instanceof GradientDrawable))
+            {
+                view.setBackground(round(0x3d10141a, dp(context, 100),
+                    0x4dffffff, Math.max(1, dp(context, 1))));
+            }
 
             int height = dp(context, 30);
             if (view instanceof ViewGroup)
@@ -219,61 +202,28 @@ public class LiquidTabHook extends BaseHook
     {
         if (view == null)
             return;
-        installPressAnimation(view);
         if (progress > 0.15f)
         {
             if (progress > 1f)
                 progress = 1f;
             int alpha = (int)(progress * 255f);
+            Drawable background = view.getBackground();
+            if (background instanceof InsetDrawable)
+            {
+                background.setAlpha(alpha);
+                return;
+            }
             Context context = view.getContext();
-            boolean night = context != null
-                && (context.getResources().getConfiguration().uiMode
-                & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES;
-            GradientDrawable shape = new GradientDrawable(
-                GradientDrawable.Orientation.TL_BR,
-                new int[]{
-                    night ? 0xD92AABEE : 0xE62AABEE,
-                    night ? 0xD9229ED9 : 0xE6229ED9
-                });
-            shape.setShape(GradientDrawable.RECTANGLE);
-            shape.setCornerRadius(dp(context, 100));
-            shape.setStroke(Math.max(1, dp(context, 1)), 0xA6FFFFFF);
-            InsetDrawable inset = new InsetDrawable(shape, dp(context, 3));
+            GradientDrawable shape = round(0x700a64c8, dp(context, 100),
+                0x664da6ff, Math.max(1, dp(context, 1)));
+            InsetDrawable inset = new InsetDrawable(shape, dp(context, 4));
             inset.setAlpha(alpha);
             view.setBackground(inset);
-            view.setElevation(dp(context, 4));
-            view.setTranslationZ(2f);
         }
-        else
+        else if (view.getBackground() != null)
         {
-            if (view.getBackground() != null)
-                view.setBackground(null);
-            view.setElevation(0f);
+            view.setBackground(null);
         }
-    }
-
-    private static void installPressAnimation(View view)
-    {
-        if (view == null || !PRESS_STYLED.add(view))
-            return;
-        view.setOnTouchListener((target, event) ->
-        {
-            switch (event.getActionMasked())
-            {
-                case MotionEvent.ACTION_DOWN:
-                    target.animate().scaleX(0.94f).scaleY(0.94f)
-                        .setDuration(110).start();
-                    break;
-                case MotionEvent.ACTION_UP:
-                case MotionEvent.ACTION_CANCEL:
-                    target.animate().scaleX(1f).scaleY(1f)
-                        .setDuration(170).start();
-                    break;
-                default:
-                    break;
-            }
-            return false;
-        });
     }
 
     private static GradientDrawable round(int color, int radius, int strokeColor, int strokeWidth)
