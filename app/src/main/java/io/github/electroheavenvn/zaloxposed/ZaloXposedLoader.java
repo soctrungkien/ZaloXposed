@@ -83,6 +83,17 @@ public class ZaloXposedLoader extends XposedModule
         hooks.add(new DownloadMediaHook());
         hooks.add(new BlockScreenEffectHook());
         hooks.add(new LiquidTabHook());
+        hooks.add(new MicroGSupportHook());
+        hooks.add(new BackupAgeLimitHook());
+        hooks.add(new OriginalPhotoHook());
+        hooks.add(new KeepExpiredMediaHook());
+        hooks.add(new CallRecordingHook());
+        hooks.add(new StoryPrivacyHook());
+        hooks.add(new WebLinkExternalizeHook());
+        hooks.add(new ZcloudBannerHook());
+        hooks.add(new PasscodeGraceHook());
+        hooks.add(new SponsoredPlacementsHook());
+        hooks.add(new TelemetryExtrasHook());
 
         hooks.add(new TestHook());
 

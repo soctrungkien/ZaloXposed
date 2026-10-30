@@ -776,4 +776,178 @@ public final class Config
     {
         set(KEY_ENABLE_LIQUID_UI, value);
     }
+
+    public static final String KEY_ENABLE_MICROG_SUPPORT = "enable_microg_support";
+
+    public static boolean getEnableMicroGSupport()
+    {
+        return (boolean)get(KEY_ENABLE_MICROG_SUPPORT, false);
+    }
+
+    public static void setEnableMicroGSupport(boolean value)
+    {
+        set(KEY_ENABLE_MICROG_SUPPORT, value);
+    }
+
+    public static final String KEY_REMOVE_BACKUP_AGE_LIMIT = "remove_backup_age_limit";
+
+    public static boolean getRemoveBackupAgeLimit()
+    {
+        return (boolean)get(KEY_REMOVE_BACKUP_AGE_LIMIT, false);
+    }
+
+    public static void setRemoveBackupAgeLimit(boolean value)
+    {
+        set(KEY_REMOVE_BACKUP_AGE_LIMIT, value);
+    }
+
+    public static final String KEY_PREFER_ORIGINAL_PHOTO = "prefer_original_photo";
+
+    public static boolean getPreferOriginalPhoto()
+    {
+        return (boolean)get(KEY_PREFER_ORIGINAL_PHOTO, false);
+    }
+
+    public static void setPreferOriginalPhoto(boolean value)
+    {
+        set(KEY_PREFER_ORIGINAL_PHOTO, value);
+    }
+
+    public static final String KEY_KEEP_EXPIRED_MEDIA = "keep_expired_media";
+
+    public static boolean getKeepExpiredMedia()
+    {
+        return (boolean)get(KEY_KEEP_EXPIRED_MEDIA, false);
+    }
+
+    public static void setKeepExpiredMedia(boolean value)
+    {
+        set(KEY_KEEP_EXPIRED_MEDIA, value);
+    }
+
+    public static final String KEY_ENABLE_CALL_RECORDING = "enable_call_recording";
+
+    public static boolean getEnableCallRecording()
+    {
+        return (boolean)get(KEY_ENABLE_CALL_RECORDING, false);
+    }
+
+    public static void setEnableCallRecording(boolean value)
+    {
+        set(KEY_ENABLE_CALL_RECORDING, value);
+    }
+
+    public static final String KEY_VIEW_STORIES_ANONYMOUSLY = "view_stories_anonymously";
+
+    public static boolean getViewStoriesAnonymously()
+    {
+        return (boolean)get(KEY_VIEW_STORIES_ANONYMOUSLY, false);
+    }
+
+    public static void setViewStoriesAnonymously(boolean value)
+    {
+        set(KEY_VIEW_STORIES_ANONYMOUSLY, value);
+    }
+
+    public static final String KEY_OPEN_LINKS_EXTERNALLY = "open_links_externally";
+
+    public static boolean getOpenLinksExternally()
+    {
+        return (boolean)get(KEY_OPEN_LINKS_EXTERNALLY, false);
+    }
+
+    public static void setOpenLinksExternally(boolean value)
+    {
+        set(KEY_OPEN_LINKS_EXTERNALLY, value);
+    }
+
+    public static final String KEY_HIDE_ZCLOUD_BANNER = "hide_zcloud_banner";
+
+    public static boolean getHideZCloudBanner()
+    {
+        return (boolean)get(KEY_HIDE_ZCLOUD_BANNER, false);
+    }
+
+    public static void setHideZCloudBanner(boolean value)
+    {
+        set(KEY_HIDE_ZCLOUD_BANNER, value);
+    }
+
+    public static final String KEY_PASSCODE_GRACE = "passcode_grace";
+
+    public static boolean getPasscodeGrace()
+    {
+        return (boolean)get(KEY_PASSCODE_GRACE, false);
+    }
+
+    public static void setPasscodeGrace(boolean value)
+    {
+        set(KEY_PASSCODE_GRACE, value);
+    }
+
+    public static final String KEY_PASSCODE_GRACE_MS = "passcode_grace_ms";
+
+    public static int getPasscodeGraceMs()
+    {
+        Object value = get(KEY_PASSCODE_GRACE_MS, 300000);
+        int ms = value instanceof Number ? ((Number)value).intValue() : 300000;
+        if (ms != 60000 && ms != 300000 && ms != 900000 && ms != 1800000 && ms != 3600000)
+            ms = 300000;
+        return ms;
+    }
+
+    public static void setPasscodeGraceMs(int value)
+    {
+        if (value != 60000 && value != 300000 && value != 900000 && value != 1800000 && value != 3600000)
+            value = 300000;
+        set(KEY_PASSCODE_GRACE_MS, value);
+    }
+
+    public static final String KEY_DISABLE_SPONSORED_PLACEMENTS = "disable_sponsored_placements";
+
+    public static boolean getDisableSponsoredPlacements()
+    {
+        return (boolean)get(KEY_DISABLE_SPONSORED_PLACEMENTS, false);
+    }
+
+    public static void setDisableSponsoredPlacements(boolean value)
+    {
+        set(KEY_DISABLE_SPONSORED_PLACEMENTS, value);
+    }
+
+    public static final String KEY_DISABLE_AD_ID = "disable_ad_id";
+
+    public static boolean getDisableAdId()
+    {
+        return (boolean)get(KEY_DISABLE_AD_ID, false);
+    }
+
+    public static void setDisableAdId(boolean value)
+    {
+        set(KEY_DISABLE_AD_ID, value);
+    }
+
+    public static final String KEY_DISABLE_FIREBASE_ANALYTICS = "disable_firebase_analytics";
+
+    public static boolean getDisableFirebaseAnalytics()
+    {
+        return (boolean)get(KEY_DISABLE_FIREBASE_ANALYTICS, false);
+    }
+
+    public static void setDisableFirebaseAnalytics(boolean value)
+    {
+        set(KEY_DISABLE_FIREBASE_ANALYTICS, value);
+    }
+
+    public static final String KEY_DISABLE_CRASHLYTICS = "disable_crashlytics";
+
+    public static boolean getDisableCrashlytics()
+    {
+        return (boolean)get(KEY_DISABLE_CRASHLYTICS, false);
+    }
+
+    public static void setDisableCrashlytics(boolean value)
+    {
+        set(KEY_DISABLE_CRASHLYTICS, value);
+    }
 }

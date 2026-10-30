@@ -248,10 +248,32 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         listItemSetting = ListItemSettingHelper.CreateNew(context);
         rootLayout.addView(listItemSetting);
         ListItemSettingHelper.SetIDTracking(listItemSetting, "");
-        ListItemSettingHelper.HideDivider(listItemSetting);
+        ListItemSettingHelper.ShowDivider(listItemSetting);
         ListItemSettingHelper.SetTitle(listItemSetting, Utils.IsEnglish() ? "Block ads network endpoints" : "Chặn yêu cầu mạng quảng cáo");
         ListItemSettingHelper.SetSwitch(listItemSetting, Config.getBlockAdsEndpoints());
         ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setBlockAdsEndpoints);
+
+        listItemSetting = ListItemSettingHelper.CreateNew(context);
+        rootLayout.addView(listItemSetting);
+        ListItemSettingHelper.SetIDTracking(listItemSetting, "");
+        ListItemSettingHelper.ShowDivider(listItemSetting);
+        ListItemSettingHelper.SetTitle(listItemSetting, Utils.IsEnglish() ? "Disable sponsored placements" : "Tắt vị trí quảng cáo tài trợ");
+        ListItemSettingHelper.SetSubtitle(listItemSetting, Utils.IsEnglish()
+            ? "Disable the Story and community sponsored-placement config gates."
+            : "Tắt cấu hình vị trí quảng cáo tài trợ trong Story và cộng đồng.");
+        ListItemSettingHelper.SetSwitch(listItemSetting, Config.getDisableSponsoredPlacements());
+        ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setDisableSponsoredPlacements);
+
+        listItemSetting = ListItemSettingHelper.CreateNew(context);
+        rootLayout.addView(listItemSetting);
+        ListItemSettingHelper.SetIDTracking(listItemSetting, "");
+        ListItemSettingHelper.HideDivider(listItemSetting);
+        ListItemSettingHelper.SetTitle(listItemSetting, Utils.IsEnglish() ? "Disable advertising ID" : "Tắt Advertising ID");
+        ListItemSettingHelper.SetSubtitle(listItemSetting, Utils.IsEnglish()
+            ? "Return a zeroed, limit-tracking advertising identifier to Google Play Services."
+            : "Trả về Advertising ID rỗng và bật giới hạn theo dõi cho Google Play Services.");
+        ListItemSettingHelper.SetSwitch(listItemSetting, Config.getDisableAdId());
+        ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setDisableAdId);
 
 
         separator = createSeparator(context);
@@ -262,13 +284,35 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         listItemSetting = ListItemSettingHelper.CreateNew(context);
         rootLayout.addView(listItemSetting);
         ListItemSettingHelper.SetIDTracking(listItemSetting, "");
-        ListItemSettingHelper.HideDivider(listItemSetting);
+        ListItemSettingHelper.ShowDivider(listItemSetting);
         ListItemSettingHelper.SetTitle(listItemSetting, Utils.IsEnglish() ? "Enable media download" : "Bật tải media");
         ListItemSettingHelper.SetSubtitle(listItemSetting, Utils.IsEnglish()
             ? "Add Download to story, photo and video menus. Files are saved to Pictures/Zalo and Movies/Zalo."
             : "Thêm nút Tải xuống vào menu story, ảnh và video. Tệp được lưu vào Pictures/Zalo và Movies/Zalo.");
         ListItemSettingHelper.SetSwitch(listItemSetting, Config.getEnableDownload());
         ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setEnableDownload);
+
+        listItemSetting = ListItemSettingHelper.CreateNew(context);
+        rootLayout.addView(listItemSetting);
+        ListItemSettingHelper.SetIDTracking(listItemSetting, "");
+        ListItemSettingHelper.ShowDivider(listItemSetting);
+        ListItemSettingHelper.SetTitle(listItemSetting, Utils.IsEnglish() ? "Prefer original photo quality" : "Ưu tiên chất lượng ảnh gốc");
+        ListItemSettingHelper.SetSubtitle(listItemSetting, Utils.IsEnglish()
+            ? "Use Zalo's native Original quality for picker and shared photos."
+            : "Dùng chất lượng Gốc của Zalo cho ảnh chọn và ảnh chia sẻ.");
+        ListItemSettingHelper.SetSwitch(listItemSetting, Config.getPreferOriginalPhoto());
+        ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setPreferOriginalPhoto);
+
+        listItemSetting = ListItemSettingHelper.CreateNew(context);
+        rootLayout.addView(listItemSetting);
+        ListItemSettingHelper.SetIDTracking(listItemSetting, "");
+        ListItemSettingHelper.HideDivider(listItemSetting);
+        ListItemSettingHelper.SetTitle(listItemSetting, Utils.IsEnglish() ? "Keep expired media accessible" : "Giữ media hết hạn mở được");
+        ListItemSettingHelper.SetSubtitle(listItemSetting, Utils.IsEnglish()
+            ? "Keep on-device chat files usable after Zalo marks them expired."
+            : "Giữ tệp chat trên máy mở được sau khi Zalo đánh dấu hết hạn.");
+        ListItemSettingHelper.SetSwitch(listItemSetting, Config.getKeepExpiredMedia());
+        ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setKeepExpiredMedia);
 
 
         separator = createSeparator(context);
@@ -293,10 +337,32 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         listItemSetting = ListItemSettingHelper.CreateNew(context);
         rootLayout.addView(listItemSetting);
         ListItemSettingHelper.SetIDTracking(listItemSetting, "");
-        ListItemSettingHelper.HideDivider(listItemSetting);
+        ListItemSettingHelper.ShowDivider(listItemSetting);
         ListItemSettingHelper.SetTitle(listItemSetting, Utils.IsEnglish() ? "Block QoS network endpoints" : "Chặn yêu cầu mạng QoS");
         ListItemSettingHelper.SetSwitch(listItemSetting, Config.getBlockQoSEndpoints());
         ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setBlockQoSEndpoints);
+
+        listItemSetting = ListItemSettingHelper.CreateNew(context);
+        rootLayout.addView(listItemSetting);
+        ListItemSettingHelper.SetIDTracking(listItemSetting, "");
+        ListItemSettingHelper.ShowDivider(listItemSetting);
+        ListItemSettingHelper.SetTitle(listItemSetting, Utils.IsEnglish() ? "Disable Firebase Analytics" : "Tắt Firebase Analytics");
+        ListItemSettingHelper.SetSubtitle(listItemSetting, Utils.IsEnglish()
+            ? "Drop analytics events, user IDs and user properties."
+            : "Bỏ qua sự kiện phân tích, user ID và thuộc tính người dùng.");
+        ListItemSettingHelper.SetSwitch(listItemSetting, Config.getDisableFirebaseAnalytics());
+        ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setDisableFirebaseAnalytics);
+
+        listItemSetting = ListItemSettingHelper.CreateNew(context);
+        rootLayout.addView(listItemSetting);
+        ListItemSettingHelper.SetIDTracking(listItemSetting, "");
+        ListItemSettingHelper.HideDivider(listItemSetting);
+        ListItemSettingHelper.SetTitle(listItemSetting, Utils.IsEnglish() ? "Disable Crashlytics" : "Tắt Crashlytics");
+        ListItemSettingHelper.SetSubtitle(listItemSetting, Utils.IsEnglish()
+            ? "Suppress crash reports, custom keys and Crashlytics logs."
+            : "Chặn báo cáo lỗi, custom key và nhật ký Crashlytics.");
+        ListItemSettingHelper.SetSwitch(listItemSetting, Config.getDisableCrashlytics());
+        ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setDisableCrashlytics);
 
 
         separator = createSeparator(context);
@@ -349,10 +415,97 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         listItemSetting = ListItemSettingHelper.CreateNew(context);
         rootLayout.addView(listItemSetting);
         ListItemSettingHelper.SetIDTracking(listItemSetting, "");
-        ListItemSettingHelper.HideDivider(listItemSetting);
+        ListItemSettingHelper.ShowDivider(listItemSetting);
         ListItemSettingHelper.SetTitle(listItemSetting, Utils.IsEnglish() ? "Hide \"Seen\" status" : "Ẩn trạng thái Đã xem");
         ListItemSettingHelper.SetSwitch(listItemSetting, Config.getBlockSendSeen());
         ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setBlockSendSeen);
+
+        listItemSetting = ListItemSettingHelper.CreateNew(context);
+        rootLayout.addView(listItemSetting);
+        ListItemSettingHelper.SetIDTracking(listItemSetting, "");
+        ListItemSettingHelper.ShowDivider(listItemSetting);
+        ListItemSettingHelper.SetTitle(listItemSetting, Utils.IsEnglish() ? "View stories anonymously" : "Xem story ẩn danh");
+        ListItemSettingHelper.SetSubtitle(listItemSetting, Utils.IsEnglish()
+            ? "Skip the outbound story-view acknowledgement. Story UI stays unchanged."
+            : "Bỏ gói xác nhận đã xem story gửi lên máy chủ. Giao diện story không đổi.");
+        ListItemSettingHelper.SetSwitch(listItemSetting, Config.getViewStoriesAnonymously());
+        ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setViewStoriesAnonymously);
+
+        listItemSetting = ListItemSettingHelper.CreateNew(context);
+        rootLayout.addView(listItemSetting);
+        ListItemSettingHelper.SetIDTracking(listItemSetting, "");
+        ListItemSettingHelper.HideDivider(listItemSetting);
+        ListItemSettingHelper.SetTitle(listItemSetting, Utils.IsEnglish() ? "Open web links externally" : "Mở liên kết web bằng trình duyệt");
+        ListItemSettingHelper.SetSubtitle(listItemSetting, Utils.IsEnglish()
+            ? "Open chat/feed http(s) links in the system browser. Zalo and mini-app links stay in-app."
+            : "Mở liên kết http(s) trong chat/nhật ký bằng trình duyệt. Liên kết Zalo và mini-app vẫn mở trong app.");
+        ListItemSettingHelper.SetSwitch(listItemSetting, Config.getOpenLinksExternally());
+        ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setOpenLinksExternally);
+
+
+        separator = createSeparator(context);
+        rootLayout.addView(separator);
+        headerTitle = createHeaderTitle(context);
+        headerTitle.setText(Utils.IsEnglish() ? "Calls" : "Cuộc gọi");
+        rootLayout.addView(headerTitle);
+        listItemSetting = ListItemSettingHelper.CreateNew(context);
+        rootLayout.addView(listItemSetting);
+        ListItemSettingHelper.SetIDTracking(listItemSetting, "");
+        ListItemSettingHelper.HideDivider(listItemSetting);
+        ListItemSettingHelper.SetTitle(listItemSetting, Utils.IsEnglish() ? "Auto-record calls" : "Tự động ghi âm cuộc gọi");
+        ListItemSettingHelper.SetSubtitle(listItemSetting, Utils.IsEnglish()
+            ? "Record Zalo one-to-one calls through Zalo's native recorder. WAV files are saved to Music/ZaloXposed/CallRecordings."
+            : "Ghi âm cuộc gọi Zalo 1-1 bằng bộ ghi âm gốc của Zalo. Tệp WAV lưu tại Music/ZaloXposed/CallRecordings.");
+        ListItemSettingHelper.SetSwitch(listItemSetting, Config.getEnableCallRecording());
+        ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setEnableCallRecording);
+
+
+        separator = createSeparator(context);
+        rootLayout.addView(separator);
+        headerTitle = createHeaderTitle(context);
+        headerTitle.setText(Utils.IsEnglish() ? "Security" : "Bảo mật");
+        rootLayout.addView(headerTitle);
+        RelativeLayout passcodeGraceItem = ListItemSettingHelper.CreateNew(context);
+        RelativeLayout passcodeGraceToggle = ListItemSettingHelper.CreateNew(context);
+        rootLayout.addView(passcodeGraceToggle);
+        ListItemSettingHelper.SetIDTracking(passcodeGraceToggle, "");
+        ListItemSettingHelper.ShowDivider(passcodeGraceToggle);
+        ListItemSettingHelper.SetTitle(passcodeGraceToggle, Utils.IsEnglish() ? "Passcode grace period" : "Thời gian miễn nhập mã khoá");
+        ListItemSettingHelper.SetSubtitle(passcodeGraceToggle, Utils.IsEnglish()
+            ? "Extend how long Zalo stays unlocked before asking for the app passcode"
+            : "Kéo dài thời gian Zalo giữ mở khoá trước khi yêu cầu nhập mã");
+        ListItemSettingHelper.SetSwitch(passcodeGraceToggle, Config.getPasscodeGrace());
+        ListItemSettingHelper.SetCheckedChangeListener(passcodeGraceToggle, enabled ->
+        {
+            try
+            {
+                Config.setPasscodeGrace(enabled);
+                updatePasscodeGraceAvailability(passcodeGraceItem, enabled);
+            }
+            catch (Exception e)
+            {
+                Logger.e(e);
+            }
+        });
+        rootLayout.addView(passcodeGraceItem);
+        ListItemSettingHelper.SetIDTracking(passcodeGraceItem, "");
+        ListItemSettingHelper.HideDivider(passcodeGraceItem);
+        ListItemSettingHelper.SetTitle(passcodeGraceItem, Utils.IsEnglish() ? "Grace duration" : "Thời lượng miễn nhập");
+        updatePasscodeGraceRow(passcodeGraceItem, Config.getPasscodeGraceMs());
+        updatePasscodeGraceAvailability(passcodeGraceItem, Config.getPasscodeGrace());
+        ListItemSettingHelper.SetOnClickListener(passcodeGraceItem, v ->
+        {
+            try
+            {
+                int next = nextPasscodeGraceMs(Config.getPasscodeGraceMs());
+                Config.setPasscodeGraceMs(next);
+                updatePasscodeGraceRow(passcodeGraceItem, next);
+            }
+            catch (Exception e)
+            {
+                Logger.e(e);
+            }
+        });
 
 
         separator = createSeparator(context);
@@ -511,11 +664,22 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         listItemSetting = ListItemSettingHelper.CreateNew(context);
         rootLayout.addView(listItemSetting);
         ListItemSettingHelper.SetIDTracking(listItemSetting, "");
-        ListItemSettingHelper.HideDivider(listItemSetting);
+        ListItemSettingHelper.ShowDivider(listItemSetting);
         ListItemSettingHelper.SetTitle(listItemSetting, Utils.IsEnglish() ? "Unlock ZCloud" : "Mở khoá ZCloud");
         ListItemSettingHelper.SetSubtitle(listItemSetting, Utils.IsEnglish() ? "Does not increase My Documents capacity" : "Không tăng dung lượng bộ nhớ My Documents");
         ListItemSettingHelper.SetSwitch(listItemSetting, Config.getUnlockZCloud());
         ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setUnlockZCloud);
+
+        listItemSetting = ListItemSettingHelper.CreateNew(context);
+        rootLayout.addView(listItemSetting);
+        ListItemSettingHelper.SetIDTracking(listItemSetting, "");
+        ListItemSettingHelper.HideDivider(listItemSetting);
+        ListItemSettingHelper.SetTitle(listItemSetting, Utils.IsEnglish() ? "Hide ZCloud banner" : "Ẩn banner ZCloud");
+        ListItemSettingHelper.SetSubtitle(listItemSetting, Utils.IsEnglish()
+            ? "Hide the ZCloud banner in the message list."
+            : "Ẩn banner ZCloud trong danh sách tin nhắn.");
+        ListItemSettingHelper.SetSwitch(listItemSetting, Config.getHideZCloudBanner());
+        ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setHideZCloudBanner);
 
 
         separator = createSeparator(context);
@@ -574,6 +738,34 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
                 Logger.e(e);
             }
         });
+
+
+        separator = createSeparator(context);
+        rootLayout.addView(separator);
+        headerTitle = createHeaderTitle(context);
+        headerTitle.setText(Utils.IsEnglish() ? "MicroG & Google Drive" : "MicroG & Google Drive");
+        rootLayout.addView(headerTitle);
+        listItemSetting = ListItemSettingHelper.CreateNew(context);
+        rootLayout.addView(listItemSetting);
+        ListItemSettingHelper.SetIDTracking(listItemSetting, "");
+        ListItemSettingHelper.ShowDivider(listItemSetting);
+        ListItemSettingHelper.SetTitle(listItemSetting, Utils.IsEnglish() ? "MicroG Drive support" : "Hỗ trợ Google Drive qua MicroG");
+        ListItemSettingHelper.SetSubtitle(listItemSetting, Utils.IsEnglish()
+            ? "Redirect Google accounts and Drive service binding to MicroG-RE (app.revanced). Requires MicroG installed."
+            : "Chuyển tài khoản Google và dịch vụ Drive sang MicroG-RE (app.revanced). Cần cài MicroG.");
+        ListItemSettingHelper.SetSwitch(listItemSetting, Config.getEnableMicroGSupport());
+        ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setEnableMicroGSupport);
+
+        listItemSetting = ListItemSettingHelper.CreateNew(context);
+        rootLayout.addView(listItemSetting);
+        ListItemSettingHelper.SetIDTracking(listItemSetting, "");
+        ListItemSettingHelper.HideDivider(listItemSetting);
+        ListItemSettingHelper.SetTitle(listItemSetting, Utils.IsEnglish() ? "Remove Drive backup age limit" : "Bỏ giới hạn tuổi backup Drive");
+        ListItemSettingHelper.SetSubtitle(listItemSetting, Utils.IsEnglish()
+            ? "Include media of any age in Zalo's existing Google Drive backup and restore pipeline."
+            : "Bao gồm media mọi độ tuổi trong quy trình sao lưu/phục hồi Google Drive của Zalo.");
+        ListItemSettingHelper.SetSwitch(listItemSetting, Config.getRemoveBackupAgeLimit());
+        ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setRemoveBackupAgeLimit);
 
 
         separator = createSeparator(context);
@@ -783,6 +975,44 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
                 return BACKUP_INTERVAL_OPTIONS[(i + 1) % BACKUP_INTERVAL_OPTIONS.length];
         }
         return BACKUP_INTERVAL_OPTIONS[0];
+    }
+
+    private static void updatePasscodeGraceRow(RelativeLayout item, int milliseconds) throws Exception
+    {
+        int minutes = milliseconds / 60000;
+        String state;
+        if (Utils.IsEnglish())
+        {
+            if (minutes < 60)
+                state = minutes + (minutes == 1 ? " minute" : " minutes");
+            else
+                state = (minutes / 60) + ((minutes / 60) == 1 ? " hour" : " hours");
+        }
+        else
+        {
+            if (minutes < 60)
+                state = minutes + " phút";
+            else
+                state = (minutes / 60) + " giờ";
+        }
+        ListItemSettingHelper.SetStateSetting(item, state);
+    }
+
+    private static void updatePasscodeGraceAvailability(RelativeLayout item, boolean enabled) throws Exception
+    {
+        ListItemSettingHelper.SetEnabled(item, enabled);
+        item.setAlpha(enabled ? 1f : 0.5f);
+    }
+
+    private static int nextPasscodeGraceMs(int current)
+    {
+        int[] options = new int[]{60000, 300000, 900000, 1800000, 3600000};
+        for (int i = 0; i < options.length; i++)
+        {
+            if (options[i] == current)
+                return options[(i + 1) % options.length];
+        }
+        return options[1];
     }
 
     private static void refreshCustomFontUi()
