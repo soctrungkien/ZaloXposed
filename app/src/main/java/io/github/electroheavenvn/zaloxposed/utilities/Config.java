@@ -950,4 +950,124 @@ public final class Config
     {
         set(KEY_DISABLE_CRASHLYTICS, value);
     }
+
+    public static final String KEY_AMOLED_THEME = "amoled_theme";
+
+    public static boolean getAmoledTheme()
+    {
+        return (boolean)get(KEY_AMOLED_THEME, false);
+    }
+
+    public static void setAmoledTheme(boolean value)
+    {
+        set(KEY_AMOLED_THEME, value);
+    }
+
+    public static final String KEY_STRANGER_NOTIFICATIONS = "stranger_notifications";
+
+    public static boolean getStrangerNotifications()
+    {
+        return (boolean)get(KEY_STRANGER_NOTIFICATIONS, false);
+    }
+
+    public static void setStrangerNotifications(boolean value)
+    {
+        set(KEY_STRANGER_NOTIFICATIONS, value);
+    }
+
+    public static final String KEY_CUSTOM_SOUNDS = "custom_sounds";
+
+    public static boolean getCustomSounds()
+    {
+        return (boolean)get(KEY_CUSTOM_SOUNDS, false);
+    }
+
+    public static void setCustomSounds(boolean value)
+    {
+        set(KEY_CUSTOM_SOUNDS, value);
+    }
+
+    public static final String KEY_HIDE_DELIVERY_RECEIPTS = "hide_delivery_receipts";
+
+    public static boolean getHideDeliveryReceipts()
+    {
+        return (boolean)get(KEY_HIDE_DELIVERY_RECEIPTS, false);
+    }
+
+    public static void setHideDeliveryReceipts(boolean value)
+    {
+        set(KEY_HIDE_DELIVERY_RECEIPTS, value);
+    }
+
+    public static final String KEY_HIDE_READ_RECEIPTS = "hide_read_receipts";
+
+    public static boolean getHideReadReceipts()
+    {
+        return (boolean)get(KEY_HIDE_READ_RECEIPTS, false);
+    }
+
+    public static void setHideReadReceipts(boolean value)
+    {
+        set(KEY_HIDE_READ_RECEIPTS, value);
+    }
+
+    public static final String KEY_HIDE_OFFICIAL_ACCOUNTS = "hide_official_accounts";
+
+    public static boolean getHideOfficialAccounts()
+    {
+        return (boolean)get(KEY_HIDE_OFFICIAL_ACCOUNTS, false);
+    }
+
+    public static void setHideOfficialAccounts(boolean value)
+    {
+        set(KEY_HIDE_OFFICIAL_ACCOUNTS, value);
+    }
+
+    public static final String KEY_VIEW_ONLINE_PRIVATELY = "view_online_privately";
+
+    public static boolean getViewOnlinePrivately()
+    {
+        return (boolean)get(KEY_VIEW_ONLINE_PRIVATELY, false);
+    }
+
+    public static void setViewOnlinePrivately(boolean value)
+    {
+        set(KEY_VIEW_ONLINE_PRIVATELY, value);
+    }
+
+    public static final String KEY_HIDE_FEED_ADS = "hide_feed_ads";
+
+    public static boolean getHideFeedAds()
+    {
+        return (boolean)get(KEY_HIDE_FEED_ADS, false);
+    }
+
+    public static void setHideFeedAds(boolean value)
+    {
+        set(KEY_HIDE_FEED_ADS, value);
+    }
+
+    public static final String KEY_HIDE_MESSAGE_ADS = "hide_message_ads";
+
+    public static boolean getHideMessageAds()
+    {
+        return (boolean)get(KEY_HIDE_MESSAGE_ADS, false);
+    }
+
+    public static void setHideMessageAds(boolean value)
+    {
+        set(KEY_HIDE_MESSAGE_ADS, value);
+    }
+
+    public static final String KEY_ENABLE_DRIVE_MEDIA_BACKUP = "enable_drive_media_backup";
+
+    public static boolean getEnableDriveMediaBackup()
+    {
+        return (boolean)get(KEY_ENABLE_DRIVE_MEDIA_BACKUP, false);
+    }
+
+    public static void setEnableDriveMediaBackup(boolean value)
+    {
+        set(KEY_ENABLE_DRIVE_MEDIA_BACKUP, value);
+    }
 }

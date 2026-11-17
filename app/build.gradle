@@ -8,6 +8,9 @@ if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 }
 
+def signingStoreFile = keystoreProperties['signing.storeFile']
+def hasSigning = signingStoreFile != null && !signingStoreFile.toString().isEmpty()
+
 def getGitCommitCount = { ->
     def propertyValue = project.findProperty("versionCode")
     if (propertyValue != null) {
@@ -37,16 +40,20 @@ android {
 
     signingConfigs {
         release {
-            storeFile = file(keystoreProperties['signing.storeFile'])
-            storePassword = keystoreProperties['signing.storePassword']
-            keyAlias = keystoreProperties['signing.keyAlias']
-            keyPassword = keystoreProperties['signing.keyPassword']
+            if (hasSigning) {
+                storeFile = file(signingStoreFile)
+                storePassword = keystoreProperties['signing.storePassword']
+                keyAlias = keystoreProperties['signing.keyAlias']
+                keyPassword = keystoreProperties['signing.keyPassword']
+            }
         }
     }
 
     buildTypes {
         release {
-            signingConfig signingConfigs.release
+            if (hasSigning) {
+                signingConfig signingConfigs.release
+            }
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }

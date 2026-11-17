@@ -50,6 +50,8 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.BooleanSupplier;
+import java.util.function.Consumer;
 
 @SuppressLint("SetTextI18n")
 public class ZaloXposedSettingsMenuHook extends BaseHook
@@ -913,6 +915,54 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         separator = createSeparator(context);
         rootLayout.addView(separator);
         headerTitle = createHeaderTitle(context);
+        headerTitle.setText(Utils.IsEnglish() ? "More features" : "Thêm tính năng");
+        rootLayout.addView(headerTitle);
+
+        // Each row below is a standalone toggle; all default to off.
+        addExtraToggle(context, Utils.IsEnglish() ? "AMOLED theme" : "Nền AMOLED",
+            Utils.IsEnglish() ? "Pure black background to save battery on AMOLED screens."
+                : "Nền đen tuyền để tiết kiệm pin trên màn hình AMOLED.",
+            Config::getAmoledTheme, Config::setAmoledTheme, true);
+        addExtraToggle(context, Utils.IsEnglish() ? "Notifications from strangers" : "Thông báo từ người lạ",
+            Utils.IsEnglish() ? "Allow notifications from people who are not your contacts."
+                : "Cho phép thông báo từ người ngoài danh bạ.",
+            Config::getStrangerNotifications, Config::setStrangerNotifications, false);
+        addExtraToggle(context, Utils.IsEnglish() ? "Custom notification sounds" : "Âm báo tuỳ chỉnh",
+            Utils.IsEnglish() ? "Use ZaloXposed/sounds/notification.wav for incoming notifications."
+                : "Dùng ZaloXposed/sounds/notification.wav cho thông báo đến.",
+            Config::getCustomSounds, Config::setCustomSounds, false);
+        addExtraToggle(context, Utils.IsEnglish() ? "Hide delivery receipts" : "Ẩn xác nhận đã nhận",
+            Utils.IsEnglish() ? "Stop sending 'delivered' receipts to other people."
+                : "Không gửi xác nhận 'đã nhận' cho người khác.",
+            Config::getHideDeliveryReceipts, Config::setHideDeliveryReceipts, false);
+        addExtraToggle(context, Utils.IsEnglish() ? "Hide read receipts" : "Ẩn xác nhận đã đọc",
+            Utils.IsEnglish() ? "Stop sending 'seen' receipts to other people."
+                : "Không gửi xác nhận 'đã xem' cho người khác.",
+            Config::getHideReadReceipts, Config::setHideReadReceipts, false);
+        addExtraToggle(context, Utils.IsEnglish() ? "Hide Official Accounts" : "Ẩn tài khoản chính thức",
+            Utils.IsEnglish() ? "Hide Official Account messages from the chat list."
+                : "Ẩn tin nhắn tài khoản chính thức khỏi danh sách chat.",
+            Config::getHideOfficialAccounts, Config::setHideOfficialAccounts, false);
+        addExtraToggle(context, Utils.IsEnglish() ? "View online status privately" : "Xem online riêng tư",
+            Utils.IsEnglish() ? "See other people's online status without appearing online yourself."
+                : "Xem trạng thái online của người khác mà không bị lộ.",
+            Config::getViewOnlinePrivately, Config::setViewOnlinePrivately, false);
+        addExtraToggle(context, Utils.IsEnglish() ? "Hide feed ads" : "Ẩn quảng cáo nhật ký",
+            Utils.IsEnglish() ? "Hide promotions and advertisements in the news feed."
+                : "Ẩn khuyến mãi và quảng cáo trong nhật ký.",
+            Config::getHideFeedAds, Config::setHideFeedAds, false);
+        addExtraToggle(context, Utils.IsEnglish() ? "Hide message ads" : "Ẩn quảng cáo tin nhắn",
+            Utils.IsEnglish() ? "Hide advertisements shown inside chat conversations."
+                : "Ẩn quảng cáo hiển thị trong cuộc trò chuyện.",
+            Config::getHideMessageAds, Config::setHideMessageAds, false);
+        addExtraToggle(context, Utils.IsEnglish() ? "Drive media backup" : "Sao lưu media qua Drive",
+            Utils.IsEnglish() ? "Force-enable Zalo's media backup to Google Drive."
+                : "Bắt buộc bật sao lưu ảnh/video lên Google Drive.",
+            Config::getEnableDriveMediaBackup, Config::setEnableDriveMediaBackup, false);
+
+        separator = createSeparator(context);
+        rootLayout.addView(separator);
+        headerTitle = createHeaderTitle(context);
         headerTitle.setText(Utils.IsEnglish() ? "Configuration backup & restore" : "Sao lưu & Khôi phục cấu hình");
         rootLayout.addView(headerTitle);
 
@@ -948,6 +998,22 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
             separator = createSeparator(context);
             rootLayout.addView(separator);
         }
+    }
+
+    private static void addExtraToggle(Context context, String title, String subtitle,
+        BooleanSupplier getter, Consumer<Boolean> setter, boolean showDivider) throws Exception
+    {
+        RelativeLayout item = ListItemSettingHelper.CreateNew(context);
+        rootLayout.addView(item);
+        ListItemSettingHelper.SetIDTracking(item, "");
+        if (showDivider)
+            ListItemSettingHelper.ShowDivider(item);
+        else
+            ListItemSettingHelper.HideDivider(item);
+        ListItemSettingHelper.SetTitle(item, title);
+        ListItemSettingHelper.SetSubtitle(item, subtitle);
+        ListItemSettingHelper.SetSwitch(item, getter.getAsBoolean());
+        ListItemSettingHelper.SetCheckedChangeListener(item, setter::accept);
     }
 
     private static void refreshBackgroundSourceUi()

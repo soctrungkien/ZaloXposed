@@ -83,15 +83,17 @@ public class HideAdsHook extends BaseHook
             module.hook(method).intercept(chain ->
             {
                 Object result = chain.proceed();
-                if (Config.getHideFeedItemZInstantAds())
-                {
-                    View view = (View)chain.getArg(1);
-                    if (view == null)
-                        return result;
-                    Class<?> viewClass = view.getClass();
-                    if (viewClass.getName().equals("com.zing.zalo.social.presentation.timeline.components.ads.FeedItemZInstantAds"))
-                        Utils.HideView(view);
-                }
+                View view = (View)chain.getArg(1);
+                if (view == null)
+                    return result;
+                String viewName = view.getClass().getName();
+                if (Config.getHideFeedItemZInstantAds()
+                    && viewName.equals("com.zing.zalo.social.presentation.timeline.components.ads.FeedItemZInstantAds"))
+                    Utils.HideView(view);
+                if (Config.getHideFeedAds()
+                    && (viewName.contains("FeedItemVideoChannel")
+                        || viewName.contains("FeedItemZInstantAds")))
+                    Utils.HideView(view);
                 return result;
             });
         }

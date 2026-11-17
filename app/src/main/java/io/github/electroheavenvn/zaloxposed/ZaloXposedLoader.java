@@ -94,6 +94,9 @@ public class ZaloXposedLoader extends XposedModule
         hooks.add(new PasscodeGraceHook());
         hooks.add(new SponsoredPlacementsHook());
         hooks.add(new TelemetryExtrasHook());
+        hooks.add(new ExtraFeaturesHook());
+        hooks.add(new AmoledThemeHook());
+        hooks.add(new CustomSoundsHook());
 
         hooks.add(new TestHook());
 

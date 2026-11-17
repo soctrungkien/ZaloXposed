@@ -31,10 +31,7 @@ public class BlockSendSeenHook extends BaseHook
                 .addUsingNumber(107)
             ));
         if (methods.isEmpty())
-        {
             Logger.e("Target method not found");
-            return;
-        }
         for (MethodData methodData : methods)
         {
             Method method = methodData.getMethodInstance(classLoader);
@@ -45,6 +42,38 @@ public class BlockSendSeenHook extends BaseHook
                     return null;
                 return chain.proceed();
             });
+        }
+
+        // 26.10.02 anchors from the SuppressSeenStatus/HideReadReceipts patches.
+        methods = bridge.findMethod(FindMethod.create()
+            .matcher(MethodMatcher.create()
+                .addUsingString("ackMsgList", StringMatchType.Equals)
+                .addUsingString("seen", StringMatchType.Equals)
+                .addUsingString("data", StringMatchType.Equals)
+                .addUsingNumber(10309)
+                .addUsingNumber(205)
+                .addUsingNumber(10305)
+                .addUsingNumber(118)
+            ));
+        if (methods.isEmpty())
+            Logger.e("Target method not found (26.10.02)");
+        for (MethodData methodData : methods)
+        {
+            try
+            {
+                Method method = methodData.getMethodInstance(classLoader);
+                Logger.i("Hooking: " + method);
+                module.hook(method).intercept(chain ->
+                {
+                    if (Config.getBlockSendSeen() || Config.getHideReadReceipts())
+                        return null;
+                    return chain.proceed();
+                });
+            }
+            catch (Throwable t)
+            {
+                Logger.e(t);
+            }
         }
     }
 }
