@@ -1118,4 +1118,52 @@ public final class Config
     {
         set(KEY_HIDE_VIDEO_PROMOS, value);
     }
+
+    public static final String KEY_DISABLE_AD_GATES = "disable_ad_gates";
+
+    public static boolean getDisableAdGates()
+    {
+        return (boolean)get(KEY_DISABLE_AD_GATES, false);
+    }
+
+    public static void setDisableAdGates(boolean value)
+    {
+        set(KEY_DISABLE_AD_GATES, value);
+    }
+
+    public static final String KEY_HIDE_LAST_SEEN = "hide_last_seen";
+
+    public static boolean getHideLastSeen()
+    {
+        return (boolean)get(KEY_HIDE_LAST_SEEN, false);
+    }
+
+    public static void setHideLastSeen(boolean value)
+    {
+        set(KEY_HIDE_LAST_SEEN, value);
+    }
+
+    public static final String KEY_FILTER_ONLINE_LIST = "filter_online_list";
+
+    public static boolean getFilterOnlineList()
+    {
+        return (boolean)get(KEY_FILTER_ONLINE_LIST, false);
+    }
+
+    public static void setFilterOnlineList(boolean value)
+    {
+        set(KEY_FILTER_ONLINE_LIST, value);
+    }
+
+    public static final String KEY_MARK_RECALLED = "mark_recalled";
+
+    public static boolean getMarkRecalled()
+    {
+        return (boolean)get(KEY_MARK_RECALLED, false);
+    }
+
+    public static void setMarkRecalled(boolean value)
+    {
+        set(KEY_MARK_RECALLED, value);
+    }
 }

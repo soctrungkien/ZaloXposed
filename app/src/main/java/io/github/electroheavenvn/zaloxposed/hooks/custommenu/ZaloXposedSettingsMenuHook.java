@@ -975,6 +975,22 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
             Utils.IsEnglish() ? "Hide Zalo Video promotion rows in the news feed."
                 : "Ẩn hàng khuyến mãi Zalo Video trong nhật ký.",
             Config::getHideVideoPromos, Config::setHideVideoPromos, false);
+        addExtraToggle(context, Utils.IsEnglish() ? "Disable ad gates" : "Tắt cổng quảng cáo",
+            Utils.IsEnglish() ? "Force story and community ad switches off."
+                : "Buộc tắt các công tắc quảng cáo story và cộng đồng.",
+            Config::getDisableAdGates, Config::setDisableAdGates, false);
+        addExtraToggle(context, Utils.IsEnglish() ? "Hide last seen" : "Ẩn lần xem cuối",
+            Utils.IsEnglish() ? "Do not expose the last-seen timestamp to other people."
+                : "Không để lộ thời điểm xem cuối cho người khác.",
+            Config::getHideLastSeen, Config::setHideLastSeen, false);
+        addExtraToggle(context, Utils.IsEnglish() ? "Filter online list" : "Lọc danh sách online",
+            Utils.IsEnglish() ? "Suppress the online members list in chats and friend lists."
+                : "Ẩn danh sách thành viên online trong chat và danh bạ.",
+            Config::getFilterOnlineList, Config::setFilterOnlineList, false);
+        addExtraToggle(context, Utils.IsEnglish() ? "Mark recalled messages" : "Đánh dấu tin đã thu hồi",
+            Utils.IsEnglish() ? "Append a 'recalled' label to kept messages."
+                : "Thêm nhãn 'đã thu hồi' vào tin nhắn được giữ lại.",
+            Config::getMarkRecalled, Config::setMarkRecalled, false);
 
         separator = createSeparator(context);
         rootLayout.addView(separator);
