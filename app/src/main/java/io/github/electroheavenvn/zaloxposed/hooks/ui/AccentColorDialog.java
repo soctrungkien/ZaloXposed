@@ -2,16 +2,20 @@ package io.github.electroheavenvn.zaloxposed.hooks.ui;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
+import android.text.InputType;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.BaseAdapter;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -23,51 +27,159 @@ import io.github.electroheavenvn.zaloxposed.utilities.Config;
 import io.github.electroheavenvn.zaloxposed.utilities.ThemeColors;
 import io.github.electroheavenvn.zaloxposed.utilities.Utils;
 
-/** Picker for the module accent color, including Monet and a custom hex value. */
+/** Polished picker for the module accent color (presets, Monet, custom hex). */
 public final class AccentColorDialog
 {
-    private AccentColorDialog() { }
+    private final Activity activity;
+    private final int textColor;
+    private final int secondary;
+    private final int accent;
+    private final int background;
+    private final int card;
+    private Dialog dialog;
+
+    private AccentColorDialog(Activity activity)
+    {
+        this.activity = activity;
+        this.textColor = resolve(android.R.attr.textColorPrimary, 0xFF111111);
+        this.secondary = resolve(android.R.attr.textColorSecondary, 0xFF757575);
+        this.accent = ThemeColors.getAccent(activity);
+        this.background = resolve(android.R.attr.colorBackgroundFloating, 0xFFFFFFFF);
+        this.card = withAlpha(textColor, 0x0A);
+    }
 
     public static void show(Context context)
     {
         Activity activity = BackgroundUtils.findActivity(context);
-        if (activity == null)
-            return;
-
-        int textColor = resolve(activity, android.R.attr.textColorPrimary, 0xFF111111);
-        int secondary = resolve(activity, android.R.attr.textColorSecondary, 0xFF757575);
-
-        GridView grid = new GridView(activity);
-        grid.setNumColumns(4);
-        grid.setVerticalSpacing(dp(activity, 12));
-        grid.setHorizontalSpacing(dp(activity, 8));
-        grid.setPadding(dp(activity, 16), dp(activity, 12), dp(activity, 16), dp(activity, 12));
-        grid.setAdapter(new ColorAdapter(activity, textColor, secondary));
-
-        new AlertDialog.Builder(activity)
-            .setTitle(Utils.IsEnglish() ? "Accent color" : "Màu nhấn")
-            .setView(grid)
-            .setNegativeButton(Utils.IsEnglish() ? "Cancel" : "Hủy", null)
-            .show();
+        if (activity != null)
+            new AccentColorDialog(activity).showDialog();
     }
 
-    private static final class ColorAdapter extends BaseAdapter
+    private void showDialog()
     {
-        private final Activity activity;
-        private final int textColor;
-        private final int secondary;
+        boolean english = Utils.IsEnglish();
+        LinearLayout root = new LinearLayout(activity);
+        root.setOrientation(LinearLayout.VERTICAL);
+        root.setBackground(rounded(background, dp(24), withAlpha(textColor, 0x12)));
+        root.setClipToOutline(true);
 
-        ColorAdapter(Activity activity, int textColor, int secondary)
+        // Header
+        LinearLayout header = new LinearLayout(activity);
+        header.setOrientation(LinearLayout.HORIZONTAL);
+        header.setGravity(Gravity.CENTER_VERTICAL);
+        header.setPadding(dp(20), dp(18), dp(12), dp(8));
+        TextView title = new TextView(activity);
+        title.setText(english ? "Accent color" : "Màu nhấn");
+        title.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
+        title.setTypeface(Typeface.create("sans-serif-medium", Typeface.NORMAL));
+        title.setTextColor(textColor);
+        title.setLayoutParams(new LinearLayout.LayoutParams(0,
+            ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        header.addView(title);
+        TextView close = new TextView(activity);
+        close.setText("✕");
+        close.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
+        close.setTextColor(secondary);
+        close.setGravity(Gravity.CENTER);
+        close.setPadding(dp(8), dp(4), dp(8), dp(4));
+        close.setOnClickListener(v -> dismiss());
+        header.addView(close, new LinearLayout.LayoutParams(dp(36), dp(36)));
+        root.addView(header);
+
+        // Current color preview
+        LinearLayout preview = new LinearLayout(activity);
+        preview.setOrientation(LinearLayout.HORIZONTAL);
+        preview.setGravity(Gravity.CENTER_VERTICAL);
+        preview.setPadding(dp(20), dp(8), dp(20), dp(16));
+        ImageView circle = new ImageView(activity);
+        circle.setImageDrawable(roundColor(accent, dp(56)));
+        preview.addView(circle, new LinearLayout.LayoutParams(dp(56), dp(56)));
+        LinearLayout info = new LinearLayout(activity);
+        info.setOrientation(LinearLayout.VERTICAL);
+        LinearLayout.LayoutParams infoParams = new LinearLayout.LayoutParams(
+            0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
+        infoParams.setMargins(dp(14), 0, 0, 0);
+        info.setLayoutParams(infoParams);
+        TextView label = new TextView(activity);
+        label.setText(ThemeColors.currentLabel(activity));
+        label.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
+        label.setTypeface(Typeface.create("sans-serif-medium", Typeface.NORMAL));
+        label.setTextColor(textColor);
+        info.addView(label);
+        TextView hint = new TextView(activity);
+        hint.setText(english ? "Tap a color to apply" : "Chạm vào màu để áp dụng");
+        hint.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
+        hint.setTextColor(secondary);
+        info.addView(hint);
+        preview.addView(info);
+        root.addView(preview);
+
+        root.addView(divider());
+
+        // Swatch grid
+        GridView grid = new GridView(activity);
+        grid.setNumColumns(4);
+        grid.setVerticalSpacing(dp(10));
+        grid.setHorizontalSpacing(dp(8));
+        grid.setPadding(dp(14), dp(12), dp(14), dp(8));
+        grid.setSelector(android.R.color.transparent);
+        grid.setAdapter(new ColorAdapter());
+        root.addView(grid, new LinearLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT, dp(300)));
+
+        root.addView(divider());
+
+        // Footer
+        LinearLayout footer = new LinearLayout(activity);
+        footer.setOrientation(LinearLayout.HORIZONTAL);
+        footer.setGravity(Gravity.CENTER_VERTICAL);
+        footer.setPadding(dp(20), dp(12), dp(16), dp(16));
+        TextView note = new TextView(activity);
+        note.setText(english ? "Restart Zalo to apply" : "Khởi động lại Zalo để áp dụng");
+        note.setTextSize(TypedValue.COMPLEX_UNIT_SP, 11);
+        note.setTextColor(secondary);
+        note.setLayoutParams(new LinearLayout.LayoutParams(
+            0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        footer.addView(note);
+        TextView custom = new TextView(activity);
+        custom.setText(english ? "Custom hex…" : "Màu tuỳ chỉnh…");
+        custom.setTextSize(TypedValue.COMPLEX_UNIT_SP, 13);
+        custom.setTypeface(Typeface.DEFAULT_BOLD);
+        custom.setTextColor(accent);
+        custom.setPadding(dp(10), dp(8), dp(10), dp(8));
+        custom.setOnClickListener(v -> askCustom());
+        footer.addView(custom);
+        root.addView(footer);
+
+        dialog = new Dialog(activity);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(root);
+        dialog.setCanceledOnTouchOutside(true);
+        dialog.show();
+        Window window = dialog.getWindow();
+        if (window != null)
         {
-            this.activity = activity;
-            this.textColor = textColor;
-            this.secondary = secondary;
+            window.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(Color.TRANSPARENT));
+            int width = (int)(activity.getResources().getDisplayMetrics().widthPixels * 0.9f);
+            window.setLayout(width, ViewGroup.LayoutParams.WRAP_CONTENT);
         }
+    }
 
+    private View divider()
+    {
+        View view = new View(activity);
+        view.setBackgroundColor(withAlpha(textColor, 0x12));
+        view.setLayoutParams(new LinearLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT, dp(1)));
+        return view;
+    }
+
+    private final class ColorAdapter extends BaseAdapter
+    {
         @Override
         public int getCount()
         {
-            return ThemeColors.VALUES.length;
+            return ThemeColors.VALUES.length - 1; // custom lives in the footer
         }
 
         @Override
@@ -88,98 +200,111 @@ public final class AccentColorDialog
             LinearLayout cell = new LinearLayout(activity);
             cell.setOrientation(LinearLayout.VERTICAL);
             cell.setGravity(Gravity.CENTER);
-            cell.setPadding(dp(activity, 4), dp(activity, 6), dp(activity, 4), dp(activity, 6));
+            cell.setBackground(rounded(card, dp(14), 0));
+            cell.setPadding(dp(4), dp(10), dp(4), dp(10));
 
-            ImageView swatch = new ImageView(activity);
-            int color = position == ThemeColors.VALUES.length - 2
-                ? ThemeColors.getAccent(activity)
-                : ThemeColors.parse(ThemeColors.VALUES[position], 0xFF0068FF);
-            if (position == ThemeColors.VALUES.length - 1)
+            String value = ThemeColors.VALUES[position];
+            boolean monet = ThemeColors.MONET.equalsIgnoreCase(value);
+            int color = monet ? ThemeColors.getMonetAccent(activity)
+                : ThemeColors.parse(value, 0xFF0068FF);
+            if (color == 0)
+                color = 0xFF6750A4;
+
+            FrameLayout swatch = new FrameLayout(activity);
+            ImageView circle = new ImageView(activity);
+            circle.setImageDrawable(roundColor(color, dp(40)));
+            swatch.addView(circle, new FrameLayout.LayoutParams(dp(40), dp(40), Gravity.CENTER));
+            if (value.equalsIgnoreCase(Config.getAccentColor()))
             {
-                GradientDrawable ring = new GradientDrawable();
-                ring.setShape(GradientDrawable.OVAL);
-                ring.setStroke(dp(activity, 2), secondary);
-                swatch.setImageDrawable(ring);
+                TextView check = new TextView(activity);
+                check.setText("✓");
+                check.setTextColor(Color.WHITE);
+                check.setTextSize(TypedValue.COMPLEX_UNIT_SP, 17);
+                check.setGravity(Gravity.CENTER);
+                check.setShadowLayer(dp(2), 0, 0, 0x99000000);
+                swatch.addView(check, new FrameLayout.LayoutParams(
+                    dp(40), dp(40), Gravity.CENTER));
             }
-            else
+            LinearLayout.LayoutParams swatchParams = new LinearLayout.LayoutParams(
+                dp(44), dp(44));
+            swatchParams.setMargins(0, 0, 0, dp(6));
+            cell.addView(swatch, swatchParams);
+
+            TextView name = new TextView(activity);
+            name.setText(ThemeColors.NAMES[position]);
+            name.setTextSize(TypedValue.COMPLEX_UNIT_SP, 10);
+            name.setTextColor(textColor);
+            name.setGravity(Gravity.CENTER);
+            cell.addView(name);
+
+            cell.setOnClickListener(v ->
             {
-                GradientDrawable circle = new GradientDrawable();
-                circle.setShape(GradientDrawable.OVAL);
-                circle.setColor(color);
-                swatch.setImageDrawable(circle);
-            }
-            int size = dp(activity, 44);
-            cell.addView(swatch, new LinearLayout.LayoutParams(size, size));
-
-            TextView label = new TextView(activity);
-            label.setText(ThemeColors.NAMES[position]);
-            label.setTextSize(TypedValue.COMPLEX_UNIT_SP, 11);
-            label.setTextColor(textColor);
-            label.setGravity(Gravity.CENTER);
-            label.setPadding(0, dp(activity, 6), 0, 0);
-            cell.addView(label);
-
-            final int selected = position;
-            cell.setOnClickListener(v -> select(selected));
+                Config.setAccentColor(value);
+                Toast.makeText(activity,
+                    Utils.IsEnglish() ? "Accent color saved" : "Đã lưu màu nhấn",
+                    Toast.LENGTH_SHORT).show();
+                dismiss();
+            });
             return cell;
-        }
-
-        private void select(int position)
-        {
-            if (position == ThemeColors.VALUES.length - 1)
-            {
-                askCustom();
-                return;
-            }
-            Config.setAccentColor(ThemeColors.VALUES[position]);
-            Toast.makeText(activity,
-                Utils.IsEnglish() ? "Accent color saved. Restart Zalo to apply."
-                    : "Đã lưu màu nhấn. Khởi động lại Zalo để áp dụng.",
-                Toast.LENGTH_SHORT).show();
-        }
-
-        private void askCustom()
-        {
-            final EditText input = new EditText(activity);
-            input.setSingleLine(true);
-            input.setHint("#6750A4");
-            input.setText(Config.getAccentColor().startsWith("#") ? Config.getAccentColor() : "");
-            input.setInputType(android.text.InputType.TYPE_CLASS_TEXT);
-            new AlertDialog.Builder(activity)
-                .setTitle(Utils.IsEnglish() ? "Custom hex color" : "Màu hex tuỳ chỉnh")
-                .setView(input)
-                .setNegativeButton(Utils.IsEnglish() ? "Cancel" : "Hủy", null)
-                .setPositiveButton(Utils.IsEnglish() ? "Save" : "Lưu", (dialog, which) ->
-                {
-                    String value = input.getText().toString().trim();
-                    if (!value.startsWith("#"))
-                        value = "#" + value;
-                    if (ThemeColors.parse(value, 0) == 0 && !"#000000".equalsIgnoreCase(value))
-                    {
-                        Toast.makeText(activity,
-                            Utils.IsEnglish() ? "Invalid color" : "Màu không hợp lệ",
-                            Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-                    Config.setAccentColor(value.toUpperCase());
-                    Toast.makeText(activity,
-                        Utils.IsEnglish() ? "Accent color saved. Restart Zalo to apply."
-                            : "Đã lưu màu nhấn. Khởi động lại Zalo để áp dụng.",
-                        Toast.LENGTH_SHORT).show();
-                })
-                .show();
         }
     }
 
-    private static int resolve(Context context, int attribute, int fallback)
+    private void askCustom()
+    {
+        final EditText input = new EditText(activity);
+        input.setSingleLine(true);
+        input.setInputType(InputType.TYPE_CLASS_TEXT);
+        input.setHint("#6750A4");
+        String current = Config.getAccentColor();
+        input.setText(current.startsWith("#") ? current : "");
+        input.setTextColor(textColor);
+        new AlertDialog.Builder(activity)
+            .setTitle(Utils.IsEnglish() ? "Custom hex color" : "Màu hex tuỳ chỉnh")
+            .setView(input)
+            .setNegativeButton(Utils.IsEnglish() ? "Cancel" : "Hủy", null)
+            .setPositiveButton(Utils.IsEnglish() ? "Save" : "Lưu", (d, which) ->
+            {
+                String value = input.getText().toString().trim();
+                if (!value.startsWith("#"))
+                    value = "#" + value;
+                if (ThemeColors.parse(value, 0) == 0 && !"#000000".equalsIgnoreCase(value))
+                {
+                    Toast.makeText(activity,
+                        Utils.IsEnglish() ? "Invalid color" : "Màu không hợp lệ",
+                        Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                Config.setAccentColor(value.toUpperCase());
+                Toast.makeText(activity,
+                    Utils.IsEnglish() ? "Accent color saved" : "Đã lưu màu nhấn",
+                    Toast.LENGTH_SHORT).show();
+                dismiss();
+            })
+            .show();
+    }
+
+    private void dismiss()
+    {
+        if (dialog != null)
+        {
+            try
+            {
+                dialog.dismiss();
+            }
+            catch (Throwable ignored) { }
+            dialog = null;
+        }
+    }
+
+    private int resolve(int attribute, int fallback)
     {
         try
         {
             TypedValue value = new TypedValue();
-            if (context.getTheme().resolveAttribute(attribute, value, true))
+            if (activity.getTheme().resolveAttribute(attribute, value, true))
             {
                 if (value.resourceId != 0)
-                    return context.getResources().getColor(value.resourceId);
+                    return activity.getResources().getColor(value.resourceId);
                 return value.data;
             }
         }
@@ -187,8 +312,31 @@ public final class AccentColorDialog
         return fallback;
     }
 
-    private static int dp(Context context, int value)
+    private GradientDrawable rounded(int color, int radius, int stroke)
     {
-        return Math.round(value * context.getResources().getDisplayMetrics().density);
+        GradientDrawable drawable = new GradientDrawable();
+        drawable.setColor(color);
+        drawable.setCornerRadius(radius);
+        if (stroke != 0)
+            drawable.setStroke(1, stroke);
+        return drawable;
+    }
+
+    private GradientDrawable roundColor(int color, int size)
+    {
+        GradientDrawable drawable = new GradientDrawable();
+        drawable.setShape(GradientDrawable.OVAL);
+        drawable.setColor(color);
+        return drawable;
+    }
+
+    private static int withAlpha(int color, int alpha)
+    {
+        return Color.argb(alpha, Color.red(color), Color.green(color), Color.blue(color));
+    }
+
+    private int dp(int value)
+    {
+        return Math.round(value * activity.getResources().getDisplayMetrics().density);
     }
 }

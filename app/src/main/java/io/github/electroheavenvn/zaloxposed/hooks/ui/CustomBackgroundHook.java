@@ -76,7 +76,18 @@ public class CustomBackgroundHook extends BaseHook
                 }
                 int blur = Config.getBackgroundBlur();
                 if (blur > 0)
-                    bg = BlurUtils.blur(bg, blur);
+                {
+                    try
+                    {
+                        Bitmap blurred = BlurUtils.blur(bg, blur);
+                        if (blurred != null)
+                            bg = blurred;
+                    }
+                    catch (Throwable t)
+                    {
+                        Logger.e(t);
+                    }
+                }
                 ImageView bgView = new ImageView(root.getContext());
                 bgView.setTag(BG_TAG);
                 bgView.setImageDrawable(new BitmapDrawable(root.getContext().getResources(), bg));

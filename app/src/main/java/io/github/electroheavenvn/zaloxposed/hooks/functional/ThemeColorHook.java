@@ -41,7 +41,7 @@ public class ThemeColorHook extends BaseHook
                     for (int blue : ThemeColors.STOCK_BLUES)
                     {
                         if (color == blue)
-                            return ThemeColors.getAccent(HookUtils.currentApplication());
+                            return ThemeColors.getAccent(HookUtils.currentContext());
                     }
                     return result;
                 });
