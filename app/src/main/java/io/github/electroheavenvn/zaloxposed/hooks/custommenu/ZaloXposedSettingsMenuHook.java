@@ -59,6 +59,7 @@ import java.util.function.Consumer;
 public class ZaloXposedSettingsMenuHook extends BaseHook
 {
     private static final String CUSTOM_ITEM_MARKER = "zalo_xposed_settings";
+    private static final String HEADER_TAG = "zalo_xposed_header";
     private static final int CUSTOM_DRAWABLE_ID = -6767;
     private static final int REQUEST_CODE_IMPORT_CONFIG = 3636;
     private static final int REQUEST_CODE_PICK_FONT = 3737;
@@ -92,9 +93,57 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         ListItemSettingHelper.SetSwitch(listItemSetting, Config.getEnableBackground());
         ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setEnableBackground);
 
-        headerTitle = createHeaderTitle(context);
-        headerTitle.setText(Utils.IsEnglish() ? "Background source" : "Nguồn hình nền");
-        rootLayout.addView(headerTitle);
+        RelativeLayout bgOpacityItem = ListItemSettingHelper.CreateNew(context);
+        rootLayout.addView(bgOpacityItem);
+        ListItemSettingHelper.SetIDTracking(bgOpacityItem, "");
+        ListItemSettingHelper.ShowDivider(bgOpacityItem);
+        ListItemSettingHelper.SetTitle(bgOpacityItem, Utils.IsEnglish() ? "Background opacity" : "Độ trong của nền");
+        updateBackgroundOpacityRow(bgOpacityItem, Config.getBackgroundOpacity());
+        ListItemSettingHelper.SetOnClickListener(bgOpacityItem, v ->
+        {
+            try
+            {
+                int next = Config.getBackgroundOpacity() + 5;
+                if (next > 100)
+                    next = 0;
+                Config.setBackgroundOpacity(next);
+                updateBackgroundOpacityRow(bgOpacityItem, next);
+            }
+            catch (Exception e)
+            {
+                Logger.e(e);
+            }
+        });
+
+        RelativeLayout bgBlurItem = ListItemSettingHelper.CreateNew(context);
+        rootLayout.addView(bgBlurItem);
+        ListItemSettingHelper.SetIDTracking(bgBlurItem, "");
+        ListItemSettingHelper.ShowDivider(bgBlurItem);
+        ListItemSettingHelper.SetTitle(bgBlurItem, Utils.IsEnglish() ? "Background blur" : "Độ mờ nền");
+        updateBackgroundBlurRow(bgBlurItem, Config.getBackgroundBlur());
+        ListItemSettingHelper.SetOnClickListener(bgBlurItem, v ->
+        {
+            try
+            {
+                int[] steps = {0, 2, 4, 8, 12, 16, 20, 25};
+                int current = Config.getBackgroundBlur();
+                int next = steps[0];
+                for (int step : steps)
+                {
+                    if (step > current)
+                    {
+                        next = step;
+                        break;
+                    }
+                }
+                Config.setBackgroundBlur(next);
+                updateBackgroundBlurRow(bgBlurItem, next);
+            }
+            catch (Exception e)
+            {
+                Logger.e(e);
+            }
+        });
 
         RelativeLayout bgAssetsItem = ListItemSettingHelper.CreateNew(context);
         rootLayout.addView(bgAssetsItem);
@@ -764,22 +813,6 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         });
 
 
-        separator = createSeparator(context);
-        rootLayout.addView(separator);
-        headerTitle = createHeaderTitle(context);
-        headerTitle.setText(Utils.IsEnglish() ? "MicroG & Google Drive" : "MicroG & Google Drive");
-        rootLayout.addView(headerTitle);
-        listItemSetting = ListItemSettingHelper.CreateNew(context);
-        rootLayout.addView(listItemSetting);
-        ListItemSettingHelper.SetIDTracking(listItemSetting, "");
-        ListItemSettingHelper.ShowDivider(listItemSetting);
-        ListItemSettingHelper.SetTitle(listItemSetting, Utils.IsEnglish() ? "MicroG Drive support" : "Hỗ trợ Google Drive qua MicroG");
-        ListItemSettingHelper.SetSubtitle(listItemSetting, Utils.IsEnglish()
-            ? "Use microG-RE for Google Drive account selection and sign-in. Prompts to install it when missing."
-            : "Dùng microG-RE để chọn tài khoản và đăng nhập Google Drive. Sẽ nhắc cài đặt nếu chưa có.");
-        ListItemSettingHelper.SetSwitch(listItemSetting, Config.getEnableMicroGSupport());
-        ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setEnableMicroGSupport);
-
         listItemSetting = ListItemSettingHelper.CreateNew(context);
         rootLayout.addView(listItemSetting);
         ListItemSettingHelper.SetIDTracking(listItemSetting, "");
@@ -1039,6 +1072,47 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
             separator = createSeparator(context);
             rootLayout.addView(separator);
         }
+        groupSettingsSections();
+    }
+
+    /** Makes every section header collapsible so the long settings page stays scannable. */
+    private static void groupSettingsSections()
+    {
+        List<View> headers = new ArrayList<>();
+        for (int i = 0; i < rootLayout.getChildCount(); i++)
+        {
+            View child = rootLayout.getChildAt(i);
+            if (HEADER_TAG.equals(child.getTag()))
+                headers.add(child);
+        }
+        for (int h = 0; h < headers.size(); h++)
+        {
+            View header = headers.get(h);
+            int start = rootLayout.indexOfChild(header) + 1;
+            int end = h + 1 < headers.size()
+                ? rootLayout.indexOfChild(headers.get(h + 1))
+                : rootLayout.getChildCount();
+            final List<View> rows = new ArrayList<>();
+            for (int i = start; i < end; i++)
+            {
+                View child = rootLayout.getChildAt(i);
+                if (!HEADER_TAG.equals(child.getTag()))
+                    rows.add(child);
+            }
+            if (!(header instanceof TextView) || rows.isEmpty())
+                continue;
+            TextView title = (TextView)header;
+            final CharSequence original = title.getText();
+            title.setClickable(true);
+            title.setText(original + "  ▾");
+            title.setOnClickListener(v ->
+            {
+                boolean collapse = rows.get(0).getVisibility() == View.VISIBLE;
+                for (View row : rows)
+                    row.setVisibility(collapse ? View.GONE : View.VISIBLE);
+                title.setText(original + (collapse ? "  ▸" : "  ▾"));
+            });
+        }
     }
 
     private static void addExtraToggle(Context context, String title, String subtitle,
@@ -1055,6 +1129,16 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         ListItemSettingHelper.SetSubtitle(item, subtitle);
         ListItemSettingHelper.SetSwitch(item, getter.getAsBoolean());
         ListItemSettingHelper.SetCheckedChangeListener(item, setter::accept);
+    }
+
+    private static void updateBackgroundOpacityRow(RelativeLayout item, int value) throws Exception
+    {
+        ListItemSettingHelper.SetSubtitle(item, value + "%");
+    }
+
+    private static void updateBackgroundBlurRow(RelativeLayout item, int value) throws Exception
+    {
+        ListItemSettingHelper.SetSubtitle(item, value + " px");
     }
 
     private static void refreshBackgroundSourceUi()
@@ -1958,6 +2042,7 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
     {
         TextView headerTitle = (TextView)headerTextViewClass.getConstructor(Context.class).newInstance(context);
         headerTitle.setVisibility(View.VISIBLE);
+        headerTitle.setTag(HEADER_TAG);
         if (templateHeader != null)
         {
             headerTitle.setTextColor(templateHeader.getTextColors());

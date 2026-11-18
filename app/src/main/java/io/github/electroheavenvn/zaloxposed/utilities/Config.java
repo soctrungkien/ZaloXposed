@@ -1180,4 +1180,30 @@ public final class Config
     {
         set(KEY_ACCENT_COLOR, value);
     }
+
+    public static final String KEY_BG_OPACITY = "bg_opacity";
+
+    public static int getBackgroundOpacity()
+    {
+        Object value = get(KEY_BG_OPACITY, 15);
+        return value instanceof Integer ? (Integer)value : 15;
+    }
+
+    public static void setBackgroundOpacity(int value)
+    {
+        set(KEY_BG_OPACITY, Math.max(0, Math.min(100, value)));
+    }
+
+    public static final String KEY_BG_BLUR = "bg_blur";
+
+    public static int getBackgroundBlur()
+    {
+        Object value = get(KEY_BG_BLUR, 0);
+        return value instanceof Integer ? (Integer)value : 0;
+    }
+
+    public static void setBackgroundBlur(int value)
+    {
+        set(KEY_BG_BLUR, Math.max(0, Math.min(25, value)));
+    }
 }

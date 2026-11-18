@@ -10,6 +10,7 @@ import android.widget.ImageView;
 
 import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
 import io.github.electroheavenvn.zaloxposed.utilities.BackgroundUtils;
+import io.github.electroheavenvn.zaloxposed.utilities.BlurUtils;
 import io.github.electroheavenvn.zaloxposed.utilities.Config;
 import io.github.electroheavenvn.zaloxposed.utilities.Logger;
 
@@ -73,11 +74,14 @@ public class CustomBackgroundHook extends BaseHook
                     Logger.e("Failed to load background");
                     return result;
                 }
+                int blur = Config.getBackgroundBlur();
+                if (blur > 0)
+                    bg = BlurUtils.blur(bg, blur);
                 ImageView bgView = new ImageView(root.getContext());
                 bgView.setTag(BG_TAG);
                 bgView.setImageDrawable(new BitmapDrawable(root.getContext().getResources(), bg));
                 bgView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-                bgView.setAlpha(0.15f);
+                bgView.setAlpha(Config.getBackgroundOpacity() / 100f);
                 root.addView(bgView, 1, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
                 return result;
             });
