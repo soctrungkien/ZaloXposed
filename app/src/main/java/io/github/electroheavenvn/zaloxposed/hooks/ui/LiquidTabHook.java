@@ -14,6 +14,7 @@ import java.lang.reflect.Method;
 import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
 import io.github.electroheavenvn.zaloxposed.utilities.Config;
 import io.github.electroheavenvn.zaloxposed.utilities.Logger;
+import io.github.electroheavenvn.zaloxposed.utilities.ThemeColors;
 
 /**
  * Port of readonly's liquid tab bar. It restyles Zalo's main tab container and
@@ -214,8 +215,9 @@ public class LiquidTabHook extends BaseHook
                 return;
             }
             Context context = view.getContext();
-            GradientDrawable shape = round(0x700a64c8, dp(context, 100),
-                0x664da6ff, Math.max(1, dp(context, 1)));
+            int accent = ThemeColors.getAccent(context);
+            GradientDrawable shape = round(ThemeColors.withAlpha(accent, 0x70), dp(context, 100),
+                ThemeColors.withAlpha(accent, 0x66), Math.max(1, dp(context, 1)));
             InsetDrawable inset = new InsetDrawable(shape, dp(context, 4));
             inset.setAlpha(alpha);
             view.setBackground(inset);

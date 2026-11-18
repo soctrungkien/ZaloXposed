@@ -1166,4 +1166,18 @@ public final class Config
     {
         set(KEY_MARK_RECALLED, value);
     }
+
+    public static final String KEY_ACCENT_COLOR = "accent_color";
+
+    /** Hex string such as {@code #6750A4}, or the special value {@code monet}. */
+    public static String getAccentColor()
+    {
+        Object value = get(KEY_ACCENT_COLOR, "#0068FF");
+        return value instanceof String ? (String)value : "#0068FF";
+    }
+
+    public static void setAccentColor(String value)
+    {
+        set(KEY_ACCENT_COLOR, value);
+    }
 }

@@ -41,6 +41,7 @@ import java.util.List;
 
 import io.github.electroheavenvn.zaloxposed.utilities.CallRecordingStore;
 import io.github.electroheavenvn.zaloxposed.utilities.Logger;
+import io.github.electroheavenvn.zaloxposed.utilities.ThemeColors;
 import io.github.electroheavenvn.zaloxposed.utilities.Utils;
 
 /**
@@ -101,7 +102,7 @@ public final class CallRecordingsDialog
         this.listContainer.setOrientation(LinearLayout.VERTICAL);
         this.colorPrimary = resolveColor(android.R.attr.textColorPrimary, 0xFF111111);
         this.colorSecondary = resolveColor(android.R.attr.textColorSecondary, 0xFF757575);
-        this.colorAccent = resolveColor(android.R.attr.colorAccent, 0xFF0068FF);
+        this.colorAccent = ThemeColors.getAccent(activity);
         this.colorBackground = resolveColor(android.R.attr.colorBackgroundFloating,
             resolveColor(android.R.attr.colorBackground, 0xFFFFFFFF));
         this.colorDivider = withAlpha(colorSecondary, 0.16f);

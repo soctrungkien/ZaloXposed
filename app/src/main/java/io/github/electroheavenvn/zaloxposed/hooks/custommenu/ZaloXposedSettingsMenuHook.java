@@ -30,11 +30,13 @@ import android.widget.Toast;
 import io.github.electroheavenvn.zaloxposed.MorpheConstants;
 import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
 import io.github.electroheavenvn.zaloxposed.hooks.ResourceHook;
+import io.github.electroheavenvn.zaloxposed.hooks.ui.AccentColorDialog;
 import io.github.electroheavenvn.zaloxposed.hooks.ui.CallRecordingsDialog;
 import io.github.electroheavenvn.zaloxposed.utilities.BackgroundUtils;
 import io.github.electroheavenvn.zaloxposed.utilities.Config;
 import io.github.electroheavenvn.zaloxposed.utilities.CustomFont;
 import io.github.electroheavenvn.zaloxposed.utilities.Logger;
+import io.github.electroheavenvn.zaloxposed.utilities.ThemeColors;
 import io.github.electroheavenvn.zaloxposed.utilities.Utils;
 
 import org.luckypray.dexkit.query.FindMethod;
@@ -593,6 +595,13 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         ListItemSettingHelper.SetTitle(listItemSetting, Utils.IsEnglish() ? "Enable extended group settings menu" : "Kích hoạt menu cài đặt nhóm mở rộng");
         ListItemSettingHelper.SetSwitch(listItemSetting, Config.getEnableExtendedGroupSettingMenu());
         ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setEnableExtendedGroupSettingMenu);
+        listItemSetting = ListItemSettingHelper.CreateNew(context);
+        rootLayout.addView(listItemSetting);
+        ListItemSettingHelper.SetIDTracking(listItemSetting, "");
+        ListItemSettingHelper.ShowDivider(listItemSetting);
+        ListItemSettingHelper.SetTitle(listItemSetting, Utils.IsEnglish() ? "Accent color" : "Màu nhấn");
+        ListItemSettingHelper.SetSubtitle(listItemSetting, ThemeColors.currentLabel(context));
+        ListItemSettingHelper.SetOnClickListener(listItemSetting, v -> AccentColorDialog.show(v.getContext()));
         listItemSetting = ListItemSettingHelper.CreateNew(context);
         rootLayout.addView(listItemSetting);
         ListItemSettingHelper.SetIDTracking(listItemSetting, "");

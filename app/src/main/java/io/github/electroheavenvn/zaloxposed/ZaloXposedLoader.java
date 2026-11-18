@@ -26,6 +26,7 @@ import io.github.electroheavenvn.zaloxposed.hooks.ads.*;
 import io.github.electroheavenvn.zaloxposed.hooks.custommenu.ZaloXposedSettingsMenuHook;
 import io.github.electroheavenvn.zaloxposed.utilities.Config;
 import io.github.electroheavenvn.zaloxposed.utilities.Logger;
+import io.github.electroheavenvn.zaloxposed.utilities.ThemeColors;
 import io.github.electroheavenvn.zaloxposed.utilities.Utils;
 
 import org.luckypray.dexkit.DexKitBridge;
@@ -96,6 +97,7 @@ public class ZaloXposedLoader extends XposedModule
         hooks.add(new TelemetryExtrasHook());
         hooks.add(new ExtraFeaturesHook());
         hooks.add(new MoreFeaturesHook());
+        hooks.add(new ThemeColorHook());
         hooks.add(new AmoledThemeHook());
         hooks.add(new CustomSoundsHook());
 
@@ -152,6 +154,7 @@ public class ZaloXposedLoader extends XposedModule
                     customSplash = inflater.inflate(layoutId, null, false);
                     if (customSplash == null)
                         return result;
+                    customSplash.setBackgroundColor(ThemeColors.getAccent(activity));
                     View decor = activity.getWindow() != null ? activity.getWindow()
                         .getDecorView() : null;
                     if (!(decor instanceof ViewGroup))
