@@ -2,9 +2,11 @@ package io.github.electroheavenvn.zaloxposed.hooks.functional;
 
 import org.luckypray.dexkit.query.FindMethod;
 import org.luckypray.dexkit.query.enums.StringMatchType;
+import org.luckypray.dexkit.query.matchers.FieldMatcher;
 import org.luckypray.dexkit.query.matchers.MethodMatcher;
 import org.luckypray.dexkit.result.MethodData;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.List;
@@ -12,6 +14,7 @@ import java.util.List;
 import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
 import io.github.electroheavenvn.zaloxposed.utilities.Config;
 import io.github.electroheavenvn.zaloxposed.utilities.Logger;
+import io.github.electroheavenvn.zaloxposed.utilities.Utils;
 
 /**
  * Extra privacy/notification tweaks ported from the {@code readonly} patches.
@@ -36,6 +39,12 @@ public class ExtraFeaturesHook extends BaseHook
             hookOnlinePrivacy();
         if (Config.getEnableDriveMediaBackup())
             hookDriveMediaBackup();
+        if (Config.getHideContactsTab() || Config.getHideTimelineTab())
+            hookNavigationTabs();
+        if (Config.getHideDirectTyping())
+            hookDirectTyping();
+        if (Config.getHideVideoPromos())
+            hookVideoPromos();
     }
 
     /** Forces a boolean gate method to return true. */
@@ -244,6 +253,140 @@ public class ExtraFeaturesHook extends BaseHook
                         return chain.proceedWith(args);
                     });
                     Logger.i("Hooking online privacy setting: " + method);
+                }
+                catch (Throwable t)
+                {
+                    Logger.e(t);
+                }
+            }
+        }
+        catch (Throwable t)
+        {
+            Logger.e(t);
+        }
+    }
+
+    /** Removes Contacts/Timeline entries from the main tab list. */
+    @SuppressWarnings("unchecked")
+    private void hookNavigationTabs()
+    {
+        try
+        {
+            List<MethodData> methods = bridge.findMethod(FindMethod.create()
+                .matcher(MethodMatcher.create()
+                    .returnType("java.util.ArrayList")
+                    .addUsingString("ENABLE_GROUP_TAB", StringMatchType.Equals)
+                    .addUsingString("ENABLE_TIMELINE_TAB", StringMatchType.Equals)));
+            for (MethodData data : methods)
+            {
+                try
+                {
+                    Method method = data.getMethodInstance(classLoader);
+                    module.hook(method).intercept(chain ->
+                    {
+                        Object result = chain.proceed();
+                        if (!(result instanceof List))
+                            return result;
+                        List<Object> tabs = (List<Object>)result;
+                        tabs.removeIf(tab ->
+                        {
+                            if (tab == null)
+                                return false;
+                            String name = tab.getClass().getName();
+                            if (Config.getHideContactsTab()
+                                && (name.contains("Phonebook") || name.contains("ContactTab")))
+                                return true;
+                            return Config.getHideTimelineTab() && name.contains("Timeline");
+                        });
+                        return result;
+                    });
+                    Logger.i("Hooking navigation tabs: " + method);
+                }
+                catch (Throwable t)
+                {
+                    Logger.e(t);
+                }
+            }
+        }
+        catch (Throwable t)
+        {
+            Logger.e(t);
+        }
+    }
+
+    /** Drops one-to-one typing packets (10306 / 106 / 31). */
+    private void hookDirectTyping()
+    {
+        try
+        {
+            List<MethodData> methods = bridge.findMethod(FindMethod.create()
+                .matcher(MethodMatcher.create()
+                    .paramTypes("int", "int", "boolean", "java.lang.String")
+                    .addUsingNumber(10306)
+                    .addUsingNumber(106)
+                    .addUsingNumber(31)));
+            for (MethodData data : methods)
+            {
+                try
+                {
+                    Method method = data.getMethodInstance(classLoader);
+                    module.hook(method).intercept(chain ->
+                        Config.getHideDirectTyping() ? null : chain.proceed());
+                    Logger.i("Hooking direct typing: " + method);
+                }
+                catch (Throwable t)
+                {
+                    Logger.e(t);
+                }
+            }
+        }
+        catch (Throwable t)
+        {
+            Logger.e(t);
+        }
+    }
+
+    /** Skips feed holder binds that carry a Z Instant / Zalo Video promo row. */
+    private void hookVideoPromos()
+    {
+        try
+        {
+            List<MethodData> methods = bridge.findMethod(FindMethod.create()
+                .matcher(MethodMatcher.create()
+                    .returnType("void")
+                    .paramCount(2)
+                    .addUsingField(FieldMatcher.create().name("E1"))
+                    .addUsingField(FieldMatcher.create().name("D1"))));
+            for (MethodData data : methods)
+            {
+                try
+                {
+                    Method method = data.getMethodInstance(classLoader);
+                    module.hook(method).intercept(chain ->
+                    {
+                        if (!Config.getHideVideoPromos())
+                            return chain.proceed();
+                        Object holder = chain.getArg(0);
+                        if (holder == null)
+                            return chain.proceed();
+                        try
+                        {
+                            for (Field field : Utils.GetAllFields(holder.getClass()))
+                            {
+                                String name = field.getName();
+                                if (!"E1".equals(name) && !"D1".equals(name))
+                                    continue;
+                                if (field.getType().isPrimitive())
+                                    continue;
+                                field.setAccessible(true);
+                                if (field.get(holder) != null)
+                                    return null;
+                            }
+                        }
+                        catch (Throwable ignored) { }
+                        return chain.proceed();
+                    });
+                    Logger.i("Hooking video promo holder: " + method);
                 }
                 catch (Throwable t)
                 {

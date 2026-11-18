@@ -959,6 +959,22 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
             Utils.IsEnglish() ? "Force-enable Zalo's media backup to Google Drive."
                 : "Bắt buộc bật sao lưu ảnh/video lên Google Drive.",
             Config::getEnableDriveMediaBackup, Config::setEnableDriveMediaBackup, false);
+        addExtraToggle(context, Utils.IsEnglish() ? "Hide Contacts tab" : "Ẩn tab Danh bạ",
+            Utils.IsEnglish() ? "Remove the Contacts tab from the main navigation bar."
+                : "Ẩn tab Danh bạ khỏi thanh điều hướng chính.",
+            Config::getHideContactsTab, Config::setHideContactsTab, false);
+        addExtraToggle(context, Utils.IsEnglish() ? "Hide Timeline tab" : "Ẩn tab Nhật ký",
+            Utils.IsEnglish() ? "Remove the Timeline tab from the main navigation bar."
+                : "Ẩn tab Nhật ký khỏi thanh điều hướng chính.",
+            Config::getHideTimelineTab, Config::setHideTimelineTab, false);
+        addExtraToggle(context, Utils.IsEnglish() ? "Hide direct typing" : "Ẩn đang soạn (1-1)",
+            Utils.IsEnglish() ? "Stop sending typing status in one-to-one chats."
+                : "Không gửi trạng thái đang soạn trong chat 1-1.",
+            Config::getHideDirectTyping, Config::setHideDirectTyping, false);
+        addExtraToggle(context, Utils.IsEnglish() ? "Hide Zalo Video promos" : "Ẩn quảng cáo Zalo Video",
+            Utils.IsEnglish() ? "Hide Zalo Video promotion rows in the news feed."
+                : "Ẩn hàng khuyến mãi Zalo Video trong nhật ký.",
+            Config::getHideVideoPromos, Config::setHideVideoPromos, false);
 
         separator = createSeparator(context);
         rootLayout.addView(separator);

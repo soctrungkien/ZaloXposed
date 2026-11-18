@@ -1070,4 +1070,52 @@ public final class Config
     {
         set(KEY_ENABLE_DRIVE_MEDIA_BACKUP, value);
     }
+
+    public static final String KEY_HIDE_CONTACTS_TAB = "hide_contacts_tab";
+
+    public static boolean getHideContactsTab()
+    {
+        return (boolean)get(KEY_HIDE_CONTACTS_TAB, false);
+    }
+
+    public static void setHideContactsTab(boolean value)
+    {
+        set(KEY_HIDE_CONTACTS_TAB, value);
+    }
+
+    public static final String KEY_HIDE_TIMELINE_TAB = "hide_timeline_tab";
+
+    public static boolean getHideTimelineTab()
+    {
+        return (boolean)get(KEY_HIDE_TIMELINE_TAB, false);
+    }
+
+    public static void setHideTimelineTab(boolean value)
+    {
+        set(KEY_HIDE_TIMELINE_TAB, value);
+    }
+
+    public static final String KEY_HIDE_DIRECT_TYPING = "hide_direct_typing";
+
+    public static boolean getHideDirectTyping()
+    {
+        return (boolean)get(KEY_HIDE_DIRECT_TYPING, false);
+    }
+
+    public static void setHideDirectTyping(boolean value)
+    {
+        set(KEY_HIDE_DIRECT_TYPING, value);
+    }
+
+    public static final String KEY_HIDE_VIDEO_PROMOS = "hide_video_promos";
+
+    public static boolean getHideVideoPromos()
+    {
+        return (boolean)get(KEY_HIDE_VIDEO_PROMOS, false);
+    }
+
+    public static void setHideVideoPromos(boolean value)
+    {
+        set(KEY_HIDE_VIDEO_PROMOS, value);
+    }
 }
