@@ -113,7 +113,15 @@ public final class SettingsMenu
                 new SwitchSettingFeature("antiRecallTitle", "", Config.KEY_ENABLE_ANTI_RECALL),
                 new SwitchSettingFeature("antiDeleteTitle", "", Config.KEY_ENABLE_ANTI_DELETE),
                 new SwitchSettingFeature("antiRecallIncludeMeTitle", "", Config.KEY_ANTI_RECALL_INCLUDE_ME),
-                new SwitchSettingFeature("antiDeleteIncludeMyDeletionTitle", "", Config.KEY_ANTI_DELETE_INCLUDE_MY_DELETION)
+                new SwitchSettingFeature("antiDeleteIncludeMyDeletionTitle", "", Config.KEY_ANTI_DELETE_INCLUDE_MY_DELETION),
+                new SwitchSettingFeature("markRecalledTitle", "", Config.KEY_MARK_RECALLED)
+            )),
+            new SettingSubCategory("notificationPrivacySubCategoryTitle", List.of(
+                new SwitchSettingFeature("strangerNotificationsTitle", "", Config.KEY_STRANGER_NOTIFICATIONS),
+                new SwitchSettingFeature("hideDeliveryReceiptsTitle", "", Config.KEY_HIDE_DELIVERY_RECEIPTS),
+                new SwitchSettingFeature("hideReadReceiptsTitle", "", Config.KEY_HIDE_READ_RECEIPTS),
+                new SwitchSettingFeature("hideDirectTypingTitle", "", Config.KEY_HIDE_DIRECT_TYPING),
+                new SwitchSettingFeature("hideOfficialAccountsTitle", "", Config.KEY_HIDE_OFFICIAL_ACCOUNTS)
             )),
             new SettingSubCategory("effectsAndContentSubCategoryTitle", List.of(
                 new SwitchSettingFeature("hideFullscreenEffectsTitle", "hideFullscreenEffectsDesc", Config.KEY_HIDE_FULLSCREEN_EFFECTS),
@@ -139,6 +147,11 @@ public final class SettingsMenu
                 new SwitchSettingFeature("silentTypingTitle", "", Config.KEY_ENABLE_SILENT_TYPING),
                 new SwitchSettingFeature("blockSendSeenTitle", "", Config.KEY_BLOCK_SEND_SEEN)
             )),
+            new SettingSubCategory("onlinePrivacySubCategoryTitle", List.of(
+                new SwitchSettingFeature("viewOnlinePrivatelyTitle", "", Config.KEY_VIEW_ONLINE_PRIVATELY),
+                new SwitchSettingFeature("hideLastSeenTitle", "", Config.KEY_HIDE_LAST_SEEN),
+                new SwitchSettingFeature("filterOnlineListTitle", "", Config.KEY_FILTER_ONLINE_LIST)
+            )),
             new SettingSubCategory("mediaFeaturesSubCategoryTitle", List.of(
                 new SwitchSettingFeature("viewStoriesAnonymouslyTitle", "", Config.KEY_VIEW_STORIES_ANONYMOUSLY),
                 new SwitchSettingFeature("openLinksExternallyTitle", "", Config.KEY_OPEN_LINKS_EXTERNALLY)
@@ -160,6 +173,7 @@ public final class SettingsMenu
                 new SwitchSettingFeature("hideFeedAdsTitle", "", Config.KEY_HIDE_FEED_ADS),
                 new SwitchSettingFeature("hideMessageAdsTitle", "", Config.KEY_HIDE_MESSAGE_ADS),
                 new SwitchSettingFeature("hideVideoPromosTitle", "", Config.KEY_HIDE_VIDEO_PROMOS),
+                new SwitchSettingFeature("disableAdGatesTitle", "", Config.KEY_DISABLE_AD_GATES),
                 new SwitchSettingFeature("hideZcloudBannerTitle", "", Config.KEY_HIDE_ZCLOUD_BANNER)
             )),
             new SettingSubCategory("logTrackSubCategoryTitle", List.of(
@@ -180,6 +194,8 @@ public final class SettingsMenu
                 new SwitchSettingFeature("customizeBottomRowTitle", "", Config.KEY_ENABLE_CUSTOMIZE_BOTTOM_ROW),
                 new SwitchSettingFeature("hideDiscoveryTabTitle", "", Config.KEY_HIDE_DISCOVERY_TAB),
                 new SwitchSettingFeature("hideNewsfeedTabTitle", "", Config.KEY_HIDE_NEWS_FEED_TAB),
+                new SwitchSettingFeature("hideContactsTabTitle", "", Config.KEY_HIDE_CONTACTS_TAB),
+                new SwitchSettingFeature("hideTimelineTabTitle", "", Config.KEY_HIDE_TIMELINE_TAB),
                 new SwitchSettingFeature("showGroupsTabTitle", "", Config.KEY_SHOW_GROUPS_TAB),
                 new SwitchSettingFeature("showMoreTabTitle", "", Config.KEY_SHOW_MORE_TAB)
             )),
@@ -246,7 +262,8 @@ public final class SettingsMenu
                 new SwitchSettingFeature("restoreGoogleDriveBackupTitle", "restoreGoogleDriveBackupDesc", Config.KEY_RESTORE_GOOGLE_DRIVE_BACKUP),
                 new SwitchSettingFeature("backupIntervalTitle", "", Config.KEY_ENABLE_BACKUP_INTERVAL),
                 new NumberSettingFeature("backupIntervalHoursTitle", "", Config.KEY_BACKUP_INTERVAL_HOURS),
-                new SwitchSettingFeature("removeBackupAgeLimitTitle", "", Config.KEY_REMOVE_BACKUP_AGE_LIMIT)
+                new SwitchSettingFeature("removeBackupAgeLimitTitle", "", Config.KEY_REMOVE_BACKUP_AGE_LIMIT),
+                new SwitchSettingFeature("driveMediaBackupTitle", "", Config.KEY_ENABLE_DRIVE_MEDIA_BACKUP)
             )),
             new SettingSubCategory("configBackupRestoreSubCategoryTitle", List.of(
                 new OptionSettingFeature("exportConfigFileTitle", "exportConfigFileDesc", (item, context) ->

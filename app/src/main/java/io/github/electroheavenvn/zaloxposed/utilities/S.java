@@ -52,6 +52,7 @@ public final class S
         trans.put("hideFeedAdsTitle", new String[] { "Hide feed ads", "Ẩn quảng cáo bảng tin" });
         trans.put("hideMessageAdsTitle", new String[] { "Hide message ads", "Ẩn quảng cáo tin nhắn" });
         trans.put("hideVideoPromosTitle", new String[] { "Hide video promos", "Ẩn video quảng cáo" });
+        trans.put("disableAdGatesTitle", new String[] { "Disable story & community ads", "Tắt quảng cáo Nhật ký & Cộng đồng" });
         trans.put("hideZcloudBannerTitle", new String[] { "Hide ZCloud banner", "Ẩn banner ZCloud" });
         trans.put("disableFirebaseAnalyticsTitle", new String[] { "Disable Firebase Analytics", "Tắt Firebase Analytics" });
         trans.put("disableCrashlyticsTitle", new String[] { "Disable Crashlytics", "Tắt Crashlytics" });
@@ -116,6 +117,14 @@ public final class S
         trans.put("antiDeleteTitle", new String[] { "Anti-Delete", "Chống xoá tin nhắn" });
         trans.put("antiRecallIncludeMeTitle", new String[] { "Include my recalled messages", "Bao gồm tin nhắn tôi đã thu hồi" });
         trans.put("antiDeleteIncludeMyDeletionTitle", new String[] { "Include messages deleted by me", "Bao gồm tin nhắn được tôi xoá" });
+        trans.put("markRecalledTitle", new String[] { "Mark recalled messages", "Đánh dấu tin nhắn đã thu hồi" });
+
+        trans.put("notificationPrivacySubCategoryTitle", new String[] { "Notifications & messages", "Thông báo & tin nhắn" });
+        trans.put("strangerNotificationsTitle", new String[] { "Notifications for strangers", "Thông báo tin nhắn từ người lạ" });
+        trans.put("hideDeliveryReceiptsTitle", new String[] { "Hide delivery receipts", "Ẩn xác nhận đã giao" });
+        trans.put("hideReadReceiptsTitle", new String[] { "Hide read receipts", "Ẩn xác nhận đã xem" });
+        trans.put("hideDirectTypingTitle", new String[] { "Hide typing status in 1-1 chats", "Ẩn trạng thái đang nhập trong chat 1-1" });
+        trans.put("hideOfficialAccountsTitle", new String[] { "Hide Official Accounts in Messages", "Ẩn tài khoản OA trong Tin nhắn" });
 
         trans.put("effectsAndContentSubCategoryTitle", new String[] { "Effects & content", "Hiệu ứng & nội dung" });
         trans.put("hideFullscreenEffectsTitle", new String[] { "Hide fullscreen effects", "Ẩn hiệu ứng toàn màn hình" });
@@ -136,6 +145,10 @@ public final class S
         trans.put("privacyStatusControlSubCategoryTitle", new String[] { "Control activity status and messages", "Kiểm soát trạng thái hoạt động và tin nhắn" });
         trans.put("silentTypingTitle", new String[] { "Hide typing indicators", "Ẩn trạng thái đang nhập" });
         trans.put("blockSendSeenTitle", new String[] { "Hide \"Seen\" status", "Ẩn trạng thái Đã xem" });
+        trans.put("onlinePrivacySubCategoryTitle", new String[] { "Online status", "Trạng thái hoạt động" });
+        trans.put("viewOnlinePrivatelyTitle", new String[] { "View online privately", "Xem online ẩn danh" });
+        trans.put("hideLastSeenTitle", new String[] { "Hide others' last seen", "Ẩn truy cập cuối của người khác" });
+        trans.put("filterOnlineListTitle", new String[] { "Hide online member list", "Ẩn danh sách thành viên online" });
 
         // Ads and tracking
         trans.put("adsSubCategoryTitle", new String[] { "Ads", "Quảng cáo" });
@@ -161,6 +174,8 @@ public final class S
         trans.put("customizeBottomRowTitle", new String[] { "Enable bottom row customization", "Kích hoạt tuỳ chỉnh thanh dưới" });
         trans.put("hideDiscoveryTabTitle", new String[] { "Hide Discovery tab", "Ẩn tab Khám Phá" });
         trans.put("hideNewsfeedTabTitle", new String[] { "Hide Newsfeed tab", "Ẩn tab Tường Nhà" });
+        trans.put("hideContactsTabTitle", new String[] { "Hide Contacts tab", "Ẩn tab Danh Bạ" });
+        trans.put("hideTimelineTabTitle", new String[] { "Hide Timeline tab", "Ẩn tab Nhật Ký" });
         trans.put("showGroupsTabTitle", new String[] { "Show Groups tab", "Hiện tab Nhóm" });
         trans.put("showMoreTabTitle", new String[] { "Show More tab", "Hiện tab Thêm" });
 
@@ -190,6 +205,7 @@ public final class S
         trans.put("backupMessagesSubCategoryTitle", new String[] { "Backup messages", "Sao lưu tin nhắn" });
         trans.put("restoreGoogleDriveBackupTitle", new String[] { "Restore Google Drive backup options", "Phục hồi tuỳ chọn sao lưu ảnh bằng Google Drive" });
         trans.put("restoreGoogleDriveBackupDesc", new String[] { "Replace the ZCloud backup options", "Thay thế tuỳ chọn sao lưu bằng ZCloud" });
+        trans.put("driveMediaBackupTitle", new String[] { "Enable Drive media backup", "Bật sao lưu media lên Drive" });
 
         trans.put("configBackupRestoreSubCategoryTitle", new String[] { "Configuration backup & restore", "Sao lưu & Khôi phục cấu hình" });
         trans.put("exportConfigFileTitle", new String[] { "Export configuration file", "Xuất tệp cấu hình" });
