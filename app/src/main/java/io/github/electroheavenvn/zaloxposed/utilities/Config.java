@@ -552,19 +552,6 @@ public final class Config
         set(KEY_ENABLE_LIQUID_GLASS_TABBAR, value);
     }
 
-    public static final String KEY_LIQUID_GLASS_COLOR = "liquid_glass_color";
-
-    public static String getLiquidGlassColor()
-    {
-        Object value = get(KEY_LIQUID_GLASS_COLOR, "");
-        return value == null ? "" : value.toString();
-    }
-
-    public static void setLiquidGlassColor(String value)
-    {
-        set(KEY_LIQUID_GLASS_COLOR, value == null ? "" : value);
-    }
-
     public static final String KEY_LIQUID_GLASS_THEME = "liquid_glass_tabbar_theme";
 
     public static int getLiquidGlassTheme()

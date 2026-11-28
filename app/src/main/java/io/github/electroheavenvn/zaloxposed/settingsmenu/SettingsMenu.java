@@ -19,7 +19,6 @@ import io.github.electroheavenvn.zaloxposed.hooks.functional.CustomCallRingtoneH
 import io.github.electroheavenvn.zaloxposed.hooks.ui.AccentColorDialog;
 import io.github.electroheavenvn.zaloxposed.hooks.ui.CustomBackgroundHook;
 import io.github.electroheavenvn.zaloxposed.hooks.ui.CustomFontHook;
-import io.github.electroheavenvn.zaloxposed.hooks.ui.LiquidColorDialog;
 import io.github.electroheavenvn.zaloxposed.utilities.Config;
 import io.github.electroheavenvn.zaloxposed.utilities.DexKitCache;
 import io.github.electroheavenvn.zaloxposed.utilities.S;
@@ -188,11 +187,6 @@ public final class SettingsMenu
                     new ListSelectionSettingFeature.Selection("liquidGlassThemeLight", 0),
                     new ListSelectionSettingFeature.Selection("liquidGlassThemeDark", 1)
                 )),
-                new OptionSettingFeature("liquidColorTitle", "liquidColorDesc", (item, context) ->
-                {
-                    if (context instanceof Activity activity)
-                        LiquidColorDialog.show(activity);
-                }),
                 new SwitchSettingFeature("amoledThemeTitle", "", Config.KEY_AMOLED_THEME),
                 new SwitchSettingFeature("customFontTitle", "", Config.KEY_CUSTOM_FONT_ENABLED),
                 new OptionSettingFeature("pickFontTitle", "pickFontDesc", (item, context) ->

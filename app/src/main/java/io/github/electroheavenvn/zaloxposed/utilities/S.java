@@ -32,8 +32,6 @@ public final class S
         trans.put("liquidGlassThemeDesc", new String[] { "Choose Light (white & blue) or Dark (charcoal glass)", "Chọn nền Sáng (trắng xanh) hoặc Tối (kính than)" });
         trans.put("liquidGlassThemeLight", new String[] { "Light", "Sáng" });
         trans.put("liquidGlassThemeDark", new String[] { "Dark", "Tối" });
-        trans.put("liquidColorTitle", new String[] { "Liquid Glass color", "Màu thanh Liquid Glass" });
-        trans.put("liquidColorDesc", new String[] { "Custom accent color for the sliding droplet", "Màu nhấn tuỳ chỉnh cho giọt trượt" });
         trans.put("bgOpacityTitle", new String[] { "Background opacity", "Độ trong nền" });
         trans.put("bgBlurTitle", new String[] { "Background blur", "Độ mờ nền" });
         trans.put("bgSourceTitle", new String[] { "Background source", "Nguồn ảnh nền" });

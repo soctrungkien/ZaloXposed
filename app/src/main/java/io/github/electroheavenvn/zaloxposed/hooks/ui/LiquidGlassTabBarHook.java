@@ -185,7 +185,10 @@ public class LiquidGlassTabBarHook extends BaseHook
                 if (ATTACHED.containsKey(root))
                     return;
 
-                ViewGroup origTabBar = findBottomTabBar(root);
+                // Zalo's concrete stock bar must be hidden completely, not just
+                // the generic bottom-bar candidate.
+                ViewGroup exact = findMainTabFrameLayout(root);
+                ViewGroup origTabBar = exact != null ? exact : findBottomTabBar(root);
                 if (origTabBar != null)
                 {
                     TabBarReplacement rep = new TabBarReplacement(root, origTabBar);
@@ -203,6 +206,27 @@ public class LiquidGlassTabBarHook extends BaseHook
             }
         };
         root.post(task);
+    }
+
+    /** Finds Zalo's stock com.zing.zalo.uicontrol.MainTabFrameLayout by class name. */
+    private static ViewGroup findMainTabFrameLayout(View view)
+    {
+        if (view == null)
+            return null;
+        String name = view.getClass().getName();
+        if ("com.zing.zalo.uicontrol.MainTabFrameLayout".equals(name)
+            || name.endsWith(".MainTabFrameLayout"))
+            return view instanceof ViewGroup group ? group : null;
+        if (view instanceof ViewGroup group)
+        {
+            for (int i = 0; i < group.getChildCount(); i++)
+            {
+                ViewGroup found = findMainTabFrameLayout(group.getChildAt(i));
+                if (found != null)
+                    return found;
+            }
+        }
+        return null;
     }
 
     private static ViewGroup findBottomTabBar(ViewGroup root)
@@ -373,6 +397,7 @@ public class LiquidGlassTabBarHook extends BaseHook
         private int origTabBarMinHeight = 0;
         private android.graphics.drawable.Drawable origTabBarBg;
         private View hiddenDivider;
+        private View mainTabFrameLayout;
         private int origDividerHeight = ViewGroup.LayoutParams.WRAP_CONTENT;
         private ViewGroup origWrapperBar;
         private int origWrapperVisibility = View.VISIBLE;
@@ -407,6 +432,7 @@ public class LiquidGlassTabBarHook extends BaseHook
         {
             this.root = root;
             this.origTabBar = origTabBar;
+            this.mainTabFrameLayout = findMainTabFrameLayout(root);
             this.preDrawListener = () ->
             {
                 if (!attached)
@@ -424,6 +450,12 @@ public class LiquidGlassTabBarHook extends BaseHook
                     origWrapperBar.setVisibility(View.GONE);
                     origWrapperBar.setAlpha(0f);
                     origWrapperBar.setTranslationY(10000f);
+                }
+                if (mainTabFrameLayout != null && mainTabFrameLayout.getVisibility() != View.GONE)
+                {
+                    mainTabFrameLayout.setVisibility(View.GONE);
+                    mainTabFrameLayout.setAlpha(0f);
+                    mainTabFrameLayout.setTranslationY(10000f);
                 }
                 return true;
             };
@@ -664,6 +696,8 @@ public class LiquidGlassTabBarHook extends BaseHook
             origTabBarMinHeight = origTabBar.getMinimumHeight();
             origTabBarBg = origTabBar.getBackground();
             collapseViewCompletely(origTabBar);
+            if (mainTabFrameLayout != null && mainTabFrameLayout != origTabBar)
+                collapseViewCompletely(mainTabFrameLayout);
             ViewParent parent = origTabBar.getParent();
             if (parent instanceof ViewGroup parentVg && parentVg != root)
             {
@@ -1291,11 +1325,13 @@ public class LiquidGlassTabBarHook extends BaseHook
 
             float cx = baseCapsuleRect.centerX() + barOffsetX;
             float cy = baseCapsuleRect.centerY() + shiftDown + barOffsetY;
-            // V6: the dock itself never scales with press. Only the dock seen
-            // through the droplet contracts 15% in Y (applied exactly once).
+            // The dock seen through the droplet contracts slightly, but never
+            // more than 1px of total height (0.5px per edge) - avoids a visible
+            // height jump when touching.
             float halfW = baseCapsuleRect.width() * 0.5f - shrinkX;
-            float innerDockScaleY = 1f - 0.15f * clamp(inflateProgress, 0f, 1f);
-            float halfH = (baseCapsuleRect.height() * 0.5f - shrinkH * 0.5f) * innerDockScaleY;
+            float baseHalfH = baseCapsuleRect.height() * 0.5f - shrinkH * 0.5f;
+            float innerInset = Math.min(baseHalfH * 0.15f * clamp(inflateProgress, 0f, 1f), 0.5f);
+            float halfH = baseHalfH - innerInset;
 
             capsuleRect.set(cx - halfW, cy - halfH, cx + halfW, cy + halfH);
             capsuleClipPath.reset();
@@ -1717,9 +1753,10 @@ public class LiquidGlassTabBarHook extends BaseHook
 
             float cx = capsuleRect.left + currentTabPos * tabW;
             float cy = capsuleRect.centerY();
-            // Enlarge the colored sliding overlay by 1px on every side.
-            out.set(cx - w * 0.5f - 1f, cy - h * 0.5f - 1f,
-                cx + w * 0.5f + 1f, cy + h * 0.5f + 1f);
+            // Enlarge the accent-colored overlay by another 1px (2px total)
+            // so the pale layer behind cannot leak outside the droplet.
+            out.set(cx - w * 0.5f - 2f, cy - h * 0.5f - 2f,
+                cx + w * 0.5f + 2f, cy + h * 0.5f + 2f);
         }
 
         @SuppressLint("ClickableViewAccessibility")
@@ -1854,18 +1891,8 @@ public class LiquidGlassTabBarHook extends BaseHook
 
         private int liquidAccent(boolean dark)
         {
-            // Custom liquid color wins; otherwise use the shared Zalo accent,
-            // which resolves Monet from the Android system palette on 12+
-            // and from the wallpaper image only on older Android.
-            String custom = Config.getLiquidGlassColor();
-            if (custom != null && !custom.isEmpty())
-            {
-                try
-                {
-                    return Color.parseColor(custom);
-                }
-                catch (Throwable ignored) { }
-            }
+            // Always share the Zalo accent (Monet from the Android system
+            // palette on 12+, wallpaper image only on older Android).
             return ThemeColors.getAccent(getContext());
         }
 
