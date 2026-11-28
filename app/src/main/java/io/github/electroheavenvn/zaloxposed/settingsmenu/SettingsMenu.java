@@ -3,6 +3,7 @@ package io.github.electroheavenvn.zaloxposed.settingsmenu;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Build;
+import android.widget.Toast;
 
 import org.luckypray.dexkit.DexKitBridge;
 
@@ -19,6 +20,7 @@ import io.github.electroheavenvn.zaloxposed.hooks.functional.CustomCallRingtoneH
 import io.github.electroheavenvn.zaloxposed.hooks.ui.AccentColorDialog;
 import io.github.electroheavenvn.zaloxposed.hooks.ui.CustomBackgroundHook;
 import io.github.electroheavenvn.zaloxposed.hooks.ui.CustomFontHook;
+import io.github.electroheavenvn.zaloxposed.utilities.CustomFont;
 import io.github.electroheavenvn.zaloxposed.utilities.Config;
 import io.github.electroheavenvn.zaloxposed.utilities.DexKitCache;
 import io.github.electroheavenvn.zaloxposed.utilities.S;
@@ -201,6 +203,14 @@ public final class SettingsMenu
                         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                         activity.startActivityForResult(intent, CustomFontHook.REQUEST_CODE_PICK_FONT);
                     }
+                }),
+                new OptionSettingFeature("removeFontTitle", "removeFontDesc", (item, context) ->
+                {
+                    CustomFont.reset(context);
+                    Toast.makeText(context,
+                        java.util.Locale.getDefault().getLanguage().equals("vi")
+                            ? "Đã xoá phông chữ tuỳ chỉnh" : "Custom font removed",
+                        Toast.LENGTH_SHORT).show();
                 }),
                 new OptionSettingFeature("accentColorTitle", "accentColorDesc", (item, context) ->
                     AccentColorDialog.show(context))

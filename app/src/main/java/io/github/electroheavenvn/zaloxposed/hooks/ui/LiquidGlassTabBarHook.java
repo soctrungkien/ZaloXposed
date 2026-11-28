@@ -1232,7 +1232,7 @@ public class LiquidGlassTabBarHook extends BaseHook
 
         // V6 motion: position 1000/1, press 420/0.90, scaleX 150/0.68,
         // scaleY 175/0.76, stretch 210/0.79.
-        private final Spring posSpring = new Spring(0.5f, 1000f, 1f);
+        private final Spring posSpring = new Spring(0.5f, 650f, 0.9f);
         private final Spring pressSpring = new Spring(0f, 420f, 0.90f);
         private final Spring scaleXSpring = new Spring(1f, 150f, 0.68f);
         private final Spring scaleYSpring = new Spring(1f, 175f, 0.76f);
@@ -1840,7 +1840,12 @@ public class LiquidGlassTabBarHook extends BaseHook
                     int hit = indexForX(x, count);
                     hoveredIndex = hit;
                     targetInflate = 1.0f;
-                    updateTargetForIndex(hit);
+                    // Follow the finger from the first frame - do not jump to
+                    // the nearest tab center; the spring handles the easing.
+                    float downTabW = capsuleRect.width() / count;
+                    float downMinCx = capsuleRect.left + downTabW * 0.44f;
+                    float downMaxCx = capsuleRect.right - downTabW * 0.44f;
+                    targetTabPos = (clamp(x, downMinCx, downMaxCx) - capsuleRect.left) / Math.max(downTabW, 1f);
                     startAnimationLoop();
                     return true;
 
