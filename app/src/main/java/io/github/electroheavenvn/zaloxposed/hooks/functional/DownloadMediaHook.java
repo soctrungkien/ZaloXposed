@@ -13,6 +13,7 @@ import io.github.electroheavenvn.zaloxposed.utilities.MediaSaver;
 import io.github.electroheavenvn.zaloxposed.utilities.Utils;
 import io.github.electroheavenvn.zaloxposed.utilities.ZaloModel;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.luckypray.dexkit.query.FindMethod;
 import org.luckypray.dexkit.query.enums.StringMatchType;
@@ -22,7 +23,9 @@ import org.luckypray.dexkit.result.MethodData;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -50,6 +53,7 @@ public class DownloadMediaHook extends BaseHook
 
     private final Map<Object, Object> stories = Collections.synchronizedMap(new WeakHashMap<>());
     private final Map<Object, FeedMedia> feeds = Collections.synchronizedMap(new WeakHashMap<>());
+    private final Map<Object, List<String>> feedStreams = Collections.synchronizedMap(new WeakHashMap<>());
 
     private volatile Context cachedContext;
 
@@ -352,7 +356,7 @@ public class DownloadMediaHook extends BaseHook
             {
                 Context context = appContext();
                 if (context != null)
-                    saveFeed(context, media);
+                    saveFeed(context, media, feedStreams.get(item));
                 if (closeSheet(chain.getThisObject()))
                     return null;
             }
@@ -457,6 +461,8 @@ public class DownloadMediaHook extends BaseHook
         if (item == null)
             return false;
         feeds.put(item, media);
+        if (media.getStreams() > 0)
+            feedStreams.put(item, collectStreamUrls(feedJsonMethod, feed));
         items.add(0, item);
         return true;
     }
@@ -484,13 +490,26 @@ public class DownloadMediaHook extends BaseHook
         return media.getUrls().size() == 1 && media.getMissing() == 0;
     }
 
-    private void saveFeed(Context context, FeedMedia media)
+    private void saveFeed(Context context, FeedMedia media, List<String> streams)
     {
         String name = "zalo_" + media.getId();
-        if (isSingle(media))
-            MediaSaver.save(context, media.getUrls().get(0), name);
+        List<String> urls = new ArrayList<>(media.getUrls());
+        if (streams != null)
+        {
+            for (String stream : streams)
+            {
+                if (stream != null && !stream.isEmpty() && !urls.contains(stream))
+                    urls.add(stream);
+            }
+        }
+        if (urls.isEmpty())
+            return;
+        boolean single = urls.size() == 1 && media.getMissing() == 0 && !urls.get(0).contains(".m3u8");
+        if (single)
+            MediaSaver.save(context, urls.get(0), name);
         else
-            MediaSaver.saveAll(context, media.getUrls(), name, media.getMissing(), media.getStreams());
+            // HLS stream URLs are handled by MediaSaver.saveAll through saveHls.
+            MediaSaver.saveAll(context, urls, name, media.getMissing(), 0);
     }
 
     private void saveStory(Context context, Object story)
@@ -505,12 +524,23 @@ public class DownloadMediaHook extends BaseHook
             }
             JSONObject json = (JSONObject)value;
             String url = json.optString("url");
-            if (!url.startsWith("http") || url.contains(".m3u8"))
+            String hls = json.optString("urlHls");
+            String stream = url.contains(".m3u8") ? url
+                : (hls.startsWith("http") ? hls : "");
+            if (!stream.isEmpty())
             {
-                boolean hlsOnly = !json.optString("urlHls").isEmpty();
-                MediaSaver.toast(context, hlsOnly
-                    ? text("This story only provides an HLS stream.", "Story này chỉ có luồng HLS.")
-                    : noMedia());
+                String owner = FeedMedia.sanitize(json.optString("ownerId"));
+                if (owner.isEmpty())
+                    owner = "user";
+                String id = FeedMedia.sanitize(json.optString("id"));
+                if (id.isEmpty())
+                    id = String.valueOf(System.currentTimeMillis());
+                MediaSaver.saveHls(context, stream, "zalo_story_" + owner + "_" + id);
+                return;
+            }
+            if (!url.startsWith("http"))
+            {
+                MediaSaver.toast(context, noMedia());
                 return;
             }
             String owner = FeedMedia.sanitize(json.optString("ownerId"));
@@ -525,6 +555,59 @@ public class DownloadMediaHook extends BaseHook
         {
             Logger.e("Cannot save story: " + t.getMessage());
         }
+    }
+
+    /** FeedMedia counts HLS streams but keeps only progressive URLs; collect the stream links separately. */
+    private static List<String> collectStreamUrls(Method feedJsonMethod, Object feed)
+    {
+        List<String> urls = new ArrayList<>();
+        try
+        {
+            Object value = feedJsonMethod.invoke(feed);
+            if (!(value instanceof JSONObject))
+                return urls;
+            JSONObject content = ((JSONObject)value).optJSONObject("content");
+            if (content != null)
+                walkStreams(content, urls);
+        }
+        catch (Throwable t)
+        {
+            Logger.e("Cannot collect HLS URLs: " + t.getMessage());
+        }
+        return urls;
+    }
+
+    private static void walkStreams(Object node, List<String> urls)
+    {
+        if (node instanceof JSONObject)
+        {
+            JSONObject object = (JSONObject)node;
+            String hls = streamLink(object.optString("hls"));
+            if (hls != null && !urls.contains(hls))
+                urls.add(hls);
+            String origin = streamLink(object.optString("origin"));
+            if (origin != null && !urls.contains(origin))
+                urls.add(origin);
+            Iterator<String> keys = object.keys();
+            while (keys.hasNext())
+                walkStreams(object.opt(keys.next()), urls);
+        }
+        else if (node instanceof JSONArray)
+        {
+            JSONArray array = (JSONArray)node;
+            for (int i = 0; i < array.length(); i++)
+                walkStreams(array.opt(i), urls);
+        }
+    }
+
+    private static String streamLink(String value)
+    {
+        if (value == null || !value.startsWith("http"))
+            return null;
+        String lower = value.toLowerCase();
+        if (!lower.contains(".m3u8") && !lower.contains("m3u8?"))
+            return null;
+        return value;
     }
 
     // ---------------------------------------------------------------- helpers

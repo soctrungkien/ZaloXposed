@@ -51,6 +51,7 @@ public final class MediaSaver
         return thread;
     });
     private static final AtomicInteger IN_FLIGHT = new AtomicInteger();
+    private static final ThreadLocal<Boolean> IN_BATCH = new ThreadLocal<>();
     private static final Handler MAIN = new Handler(Looper.getMainLooper());
 
     private MediaSaver() { }
@@ -122,6 +123,88 @@ public final class MediaSaver
         });
     }
 
+    /**
+     * Downloads an HLS (VOD) playlist, remuxes it to mp4 and publishes it into Movies/Zalo.
+     * When called from an existing saveAll worker it runs inline on that worker's slot.
+     */
+    public static void saveHls(Context context, String playlistUrl, String name) throws Exception
+    {
+        Context app = context == null ? null : context.getApplicationContext();
+        if (app == null)
+            app = context;
+        final Context target = app;
+        if (!Config.getEnableHlsDownload())
+        {
+            if (Boolean.TRUE.equals(IN_BATCH.get()))
+                throw new IOException("HLS downloads are disabled");
+            toast(target, text(Utils.IsEnglish(),
+                "HLS downloads are disabled.", "Tải luồng HLS đã bị tắt."));
+            return;
+        }
+        if (Boolean.TRUE.equals(IN_BATCH.get()))
+        {
+            persistHls(target, playlistUrl, name);
+            return;
+        }
+        if (target == null || playlistUrl == null || playlistUrl.isEmpty())
+            return;
+        if (IN_FLIGHT.incrementAndGet() > MAX_IN_FLIGHT)
+        {
+            IN_FLIGHT.decrementAndGet();
+            toast(target, text(Utils.IsEnglish(), "Too many downloads are running.", "Đang có quá nhiều lượt tải xuống."));
+            return;
+        }
+        toast(target, text(Utils.IsEnglish(), "Saving HLS stream...", "Đang tải luồng HLS..."));
+        EXECUTOR.execute(() ->
+        {
+            try
+            {
+                persistHls(target, playlistUrl, name);
+                toast(target, text(Utils.IsEnglish(),
+                    "Video saved to Movies/Zalo.", "Đã lưu video vào Movies/Zalo."));
+            }
+            catch (Throwable t)
+            {
+                Logger.e("HLS download failed: " + t.getMessage());
+                String reason = t.getMessage();
+                if (reason == null || reason.isEmpty())
+                    reason = t.getClass().getSimpleName();
+                toast(target, text(Utils.IsEnglish(), "Download failed: ", "Tải xuống thất bại: ") + reason);
+            }
+            finally
+            {
+                IN_FLIGHT.decrementAndGet();
+            }
+        });
+    }
+
+    private static void persistHls(Context context, String playlistUrl, String name) throws Exception
+    {
+        File temp = File.createTempFile("zaloxposed_hls_", ".mp4", context.getCacheDir());
+        try
+        {
+            try (OutputStream output = new FileOutputStream(temp))
+            {
+                HlsDownloader.download(playlistUrl, context.getCacheDir(), output);
+            }
+            publish(context, temp, name + ".mp4", "video/mp4", true);
+        }
+        finally
+        {
+            if (temp.exists())
+                //noinspection ResultOfMethodCallIgnored
+                temp.delete();
+        }
+    }
+
+    private static boolean isHls(String url)
+    {
+        if (url == null)
+            return false;
+        String lower = url.toLowerCase(Locale.ROOT);
+        return lower.contains(".m3u8") || lower.contains("m3u8?");
+    }
+
     public static void saveAll(Context context, List<String> urls, String name, int missing, int streams)
     {
         Context app = context.getApplicationContext();
@@ -142,15 +225,32 @@ public final class MediaSaver
         EXECUTOR.execute(() ->
         {
             int saved = 0;
+            boolean sawHls = false;
+            IN_BATCH.set(Boolean.TRUE);
             try
             {
                 for (int i = 0; i < urls.size(); i++)
                 {
+                    String url = urls.get(i);
+                    if (isHls(url))
+                    {
+                        try
+                        {
+                            saveHls(target, url, name + "_" + (i + 1));
+                            saved++;
+                            sawHls = true;
+                        }
+                        catch (Throwable t)
+                        {
+                            Logger.e("HLS download failed " + (i + 1) + "/" + urls.size() + ": " + t.getMessage());
+                        }
+                        continue;
+                    }
                     File temp = null;
                     try
                     {
                         temp = File.createTempFile("zaloxposed_", ".bin", target.getCacheDir());
-                        String[] result = fetch(target, urls.get(i), temp);
+                        String[] result = fetch(target, url, temp);
                         boolean video = result[0].startsWith("video/");
                         publish(target, temp, name + "_" + (i + 1) + "." + result[1], result[0], video);
                         saved++;
@@ -169,6 +269,7 @@ public final class MediaSaver
             }
             finally
             {
+                IN_BATCH.remove();
                 IN_FLIGHT.decrementAndGet();
                 StringBuilder message = new StringBuilder(text(Utils.IsEnglish(),
                     "Saved " + saved + "/" + urls.size() + " media item(s).",
@@ -177,7 +278,7 @@ public final class MediaSaver
                     message.append('\n').append(text(Utils.IsEnglish(),
                         missing + " more photo(s) are not in the feed payload.",
                         missing + " ảnh khác không có trong dữ liệu bài viết."));
-                if (streams > 0)
+                if (streams > 0 && !sawHls)
                     message.append('\n').append(text(Utils.IsEnglish(),
                         streams + " HLS stream(s) were skipped.",
                         streams + " luồng HLS đã được bỏ qua."));

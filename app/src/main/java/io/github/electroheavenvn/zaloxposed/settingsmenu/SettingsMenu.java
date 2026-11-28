@@ -277,6 +277,38 @@ public final class SettingsMenu
             ))
         )));
         settingItems.add(new Separator());
+        settingItems.add(new SettingCategory("moreFeaturesCategoryTitle", "moreFeaturesCategoryDesc", List.of(
+            new SettingSubCategory("mediaSavingSubCategoryTitle", List.of(
+                new SwitchSettingFeature("enableHlsDownloadTitle", "", Config.KEY_ENABLE_HLS_DOWNLOAD),
+                new SwitchSettingFeature("enableExtendedMediaSaveTitle", "", Config.KEY_ENABLE_EXTENDED_MEDIA_SAVE)
+            )),
+            new SettingSubCategory("notificationsAndConversationsSubCategoryTitle", List.of(
+                new SwitchSettingFeature("notificationMarkReadTitle", "", Config.KEY_ENABLE_NOTIFICATION_MARK_READ),
+                new SwitchSettingFeature("promoNotificationFilterTitle", "", Config.KEY_ENABLE_PROMO_NOTIFICATION_FILTER),
+                new SwitchSettingFeature("hideCallHangupToastTitle", "", Config.KEY_HIDE_CALL_HANGUP_TOAST),
+                new SwitchSettingFeature("hideZStyleConversationTitle", "", Config.KEY_HIDE_ZSTYLE_CONVERSATION)
+            )),
+            new SettingSubCategory("interfaceTweaksSubCategoryTitle", List.of(
+                new SwitchSettingFeature("chatAvatarCometTitle", "", Config.KEY_ENABLE_CHAT_AVATAR_COMET),
+                new SwitchSettingFeature("hiddenSearchSparklesTitle", "", Config.KEY_ENABLE_HIDDEN_SEARCH_SPARKLES),
+                new SwitchSettingFeature("maxVideoQualityTitle", "", Config.KEY_ENABLE_MAX_VIDEO_QUALITY),
+                new SwitchSettingFeature("minimalTopBarTitle", "", Config.KEY_ENABLE_MINIMAL_TOP_BAR)
+            )),
+            new SettingSubCategory("messagingToolsSubCategoryTitle", List.of(
+                new SwitchSettingFeature("cleanChatListTitle", "", Config.KEY_ENABLE_CLEAN_CHAT_LIST),
+                new SwitchSettingFeature("readonlyChatsTitle", "", Config.KEY_ENABLE_READONLY_CHATS),
+                new SwitchSettingFeature("chatHighlightTitle", "", Config.KEY_ENABLE_CHAT_HIGHLIGHT),
+                new SwitchSettingFeature("richTextTitle", "", Config.KEY_ENABLE_RICH_TEXT)
+            )),
+            new SettingSubCategory("advancedTweaksSubCategoryTitle", List.of(
+                new SwitchSettingFeature("unlimitedQuickMessagesTitle", "", Config.KEY_ENABLE_UNLIMITED_QUICK_MESSAGES),
+                new SwitchSettingFeature("driveContactsBypassTitle", "", Config.KEY_ENABLE_DRIVE_CONTACTS_BYPASS),
+                new SwitchSettingFeature("unlimitedPinTitle", "", Config.KEY_ENABLE_UNLIMITED_PIN)
+            )),
+            new SettingSubCategory("automationSubCategoryTitle", List.of(
+                new SwitchSettingFeature("botEngineTitle", "", Config.KEY_ENABLE_BOT_ENGINE)
+            ))
+        )));
         settingItems.add(new SettingCategory("extendedSettingsCategoryTitle", "extendedSettingsCategoryDesc", List.of(
             new SettingSubCategory("", List.of(
                 new OptionSettingFeature("openSettingViewTitle", "", ((item, context) ->

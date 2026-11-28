@@ -118,6 +118,17 @@ public class ZaloXposedLoader extends XposedModule
         hooks.add(new BrandOverrideHook());
         hooks.add(new PackageAndSignatureSpoofHook());
         hooks.add(new LiquidGlassTabBarHook());
+
+        // Additional contributed features
+        hooks.add(new ExtendedMediaSaveHook());
+        hooks.add(new NotificationEnhancementsHook());
+        hooks.add(new InterfaceTweaksHook());
+        hooks.add(new ChatRowTweaksHook());
+        hooks.add(new RichTextHook());
+        hooks.add(new QuickMessagesHook());
+        hooks.add(new DriveContactsBypassHook());
+        hooks.add(new UnlimitedPinHook());
+        hooks.add(new BotEngineHook());
     }
 
     @SuppressWarnings("deprecation")

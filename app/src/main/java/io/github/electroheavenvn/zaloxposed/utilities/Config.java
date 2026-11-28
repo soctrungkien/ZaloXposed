@@ -954,6 +954,79 @@ public final class Config
         set(KEY_MARK_RECALLED, value);
     }
 
+    // Extended features contributed by external patch sets
+    public static final String KEY_ENABLE_HLS_DOWNLOAD = "enable_hls_download";
+    public static boolean getEnableHlsDownload() { return (boolean)get(KEY_ENABLE_HLS_DOWNLOAD, false); }
+    public static void setEnableHlsDownload(boolean value) { set(KEY_ENABLE_HLS_DOWNLOAD, value); }
+
+    public static final String KEY_ENABLE_EXTENDED_MEDIA_SAVE = "enable_extended_media_save";
+    public static boolean getEnableExtendedMediaSave() { return (boolean)get(KEY_ENABLE_EXTENDED_MEDIA_SAVE, false); }
+    public static void setEnableExtendedMediaSave(boolean value) { set(KEY_ENABLE_EXTENDED_MEDIA_SAVE, value); }
+
+    public static final String KEY_ENABLE_NOTIFICATION_MARK_READ = "enable_notification_mark_read";
+    public static boolean getEnableNotificationMarkRead() { return (boolean)get(KEY_ENABLE_NOTIFICATION_MARK_READ, false); }
+    public static void setEnableNotificationMarkRead(boolean value) { set(KEY_ENABLE_NOTIFICATION_MARK_READ, value); }
+
+    public static final String KEY_ENABLE_PROMO_NOTIFICATION_FILTER = "enable_promo_notification_filter";
+    public static boolean getEnablePromoNotificationFilter() { return (boolean)get(KEY_ENABLE_PROMO_NOTIFICATION_FILTER, false); }
+    public static void setEnablePromoNotificationFilter(boolean value) { set(KEY_ENABLE_PROMO_NOTIFICATION_FILTER, value); }
+
+    public static final String KEY_HIDE_CALL_HANGUP_TOAST = "hide_call_hangup_toast";
+    public static boolean getHideCallHangupToast() { return (boolean)get(KEY_HIDE_CALL_HANGUP_TOAST, false); }
+    public static void setHideCallHangupToast(boolean value) { set(KEY_HIDE_CALL_HANGUP_TOAST, value); }
+
+    public static final String KEY_HIDE_ZSTYLE_CONVERSATION = "hide_zstyle_conversation";
+    public static boolean getHideZStyleConversation() { return (boolean)get(KEY_HIDE_ZSTYLE_CONVERSATION, false); }
+    public static void setHideZStyleConversation(boolean value) { set(KEY_HIDE_ZSTYLE_CONVERSATION, value); }
+
+    public static final String KEY_ENABLE_CHAT_AVATAR_COMET = "enable_chat_avatar_comet";
+    public static boolean getEnableChatAvatarComet() { return (boolean)get(KEY_ENABLE_CHAT_AVATAR_COMET, false); }
+    public static void setEnableChatAvatarComet(boolean value) { set(KEY_ENABLE_CHAT_AVATAR_COMET, value); }
+
+    public static final String KEY_ENABLE_HIDDEN_SEARCH_SPARKLES = "enable_hidden_search_sparkles";
+    public static boolean getEnableHiddenSearchSparkles() { return (boolean)get(KEY_ENABLE_HIDDEN_SEARCH_SPARKLES, false); }
+    public static void setEnableHiddenSearchSparkles(boolean value) { set(KEY_ENABLE_HIDDEN_SEARCH_SPARKLES, value); }
+
+    public static final String KEY_ENABLE_MAX_VIDEO_QUALITY = "enable_max_video_quality";
+    public static boolean getEnableMaxVideoQuality() { return (boolean)get(KEY_ENABLE_MAX_VIDEO_QUALITY, false); }
+    public static void setEnableMaxVideoQuality(boolean value) { set(KEY_ENABLE_MAX_VIDEO_QUALITY, value); }
+
+    public static final String KEY_ENABLE_CLEAN_CHAT_LIST = "enable_clean_chat_list";
+    public static boolean getEnableCleanChatList() { return (boolean)get(KEY_ENABLE_CLEAN_CHAT_LIST, false); }
+    public static void setEnableCleanChatList(boolean value) { set(KEY_ENABLE_CLEAN_CHAT_LIST, value); }
+
+    public static final String KEY_ENABLE_READONLY_CHATS = "enable_readonly_chats";
+    public static boolean getEnableReadonlyChats() { return (boolean)get(KEY_ENABLE_READONLY_CHATS, false); }
+    public static void setEnableReadonlyChats(boolean value) { set(KEY_ENABLE_READONLY_CHATS, value); }
+
+    public static final String KEY_ENABLE_CHAT_HIGHLIGHT = "enable_chat_highlight";
+    public static boolean getEnableChatHighlight() { return (boolean)get(KEY_ENABLE_CHAT_HIGHLIGHT, false); }
+    public static void setEnableChatHighlight(boolean value) { set(KEY_ENABLE_CHAT_HIGHLIGHT, value); }
+
+    public static final String KEY_ENABLE_MINIMAL_TOP_BAR = "enable_minimal_top_bar";
+    public static boolean getEnableMinimalTopBar() { return (boolean)get(KEY_ENABLE_MINIMAL_TOP_BAR, false); }
+    public static void setEnableMinimalTopBar(boolean value) { set(KEY_ENABLE_MINIMAL_TOP_BAR, value); }
+
+    public static final String KEY_ENABLE_RICH_TEXT = "enable_rich_text";
+    public static boolean getEnableRichText() { return (boolean)get(KEY_ENABLE_RICH_TEXT, false); }
+    public static void setEnableRichText(boolean value) { set(KEY_ENABLE_RICH_TEXT, value); }
+
+    public static final String KEY_ENABLE_UNLIMITED_QUICK_MESSAGES = "enable_unlimited_quick_messages";
+    public static boolean getEnableUnlimitedQuickMessages() { return (boolean)get(KEY_ENABLE_UNLIMITED_QUICK_MESSAGES, false); }
+    public static void setEnableUnlimitedQuickMessages(boolean value) { set(KEY_ENABLE_UNLIMITED_QUICK_MESSAGES, value); }
+
+    public static final String KEY_ENABLE_DRIVE_CONTACTS_BYPASS = "enable_drive_contacts_bypass";
+    public static boolean getEnableDriveContactsBypass() { return (boolean)get(KEY_ENABLE_DRIVE_CONTACTS_BYPASS, false); }
+    public static void setEnableDriveContactsBypass(boolean value) { set(KEY_ENABLE_DRIVE_CONTACTS_BYPASS, value); }
+
+    public static final String KEY_ENABLE_UNLIMITED_PIN = "enable_unlimited_pin";
+    public static boolean getEnableUnlimitedPin() { return (boolean)get(KEY_ENABLE_UNLIMITED_PIN, false); }
+    public static void setEnableUnlimitedPin(boolean value) { set(KEY_ENABLE_UNLIMITED_PIN, value); }
+
+    public static final String KEY_ENABLE_BOT_ENGINE = "enable_bot_engine";
+    public static boolean getEnableBotEngine() { return (boolean)get(KEY_ENABLE_BOT_ENGINE, false); }
+    public static void setEnableBotEngine(boolean value) { set(KEY_ENABLE_BOT_ENGINE, value); }
+
     public static final String KEY_ACCENT_COLOR = "accent_color";
 
     /** Hex string such as {@code #6750A4}, or the special value {@code monet}. */

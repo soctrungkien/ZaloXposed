@@ -223,6 +223,35 @@ public final class S
         trans.put("openCallLogsViewTitle", new String[] { "Open Call Logs view", "Mở giao diện \"Danh sách log\" cuộc gọi" });
 
 
+        // Additional contributed features
+        trans.put("moreFeaturesCategoryTitle", new String[] { "More features", "Thêm tính năng" });
+        trans.put("moreFeaturesCategoryDesc", new String[] { "Extra tweaks and tools", "Tinh chỉnh và công cụ bổ sung" });
+        trans.put("mediaSavingSubCategoryTitle", new String[] { "Media saving & playback", "Lưu & phát media" });
+        trans.put("notificationsAndConversationsSubCategoryTitle", new String[] { "Notifications & conversations", "Thông báo & hội thoại" });
+        trans.put("interfaceTweaksSubCategoryTitle", new String[] { "Interface tweaks", "Tinh chỉnh giao diện" });
+        trans.put("messagingToolsSubCategoryTitle", new String[] { "Messaging tools", "Công cụ tin nhắn" });
+        trans.put("advancedTweaksSubCategoryTitle", new String[] { "Advanced tweaks", "Tinh chỉnh nâng cao" });
+        trans.put("automationSubCategoryTitle", new String[] { "Automation", "Tự động hoá" });
+
+        trans.put("enableHlsDownloadTitle", new String[] { "Download HLS streams", "Tải luồng HLS" });
+        trans.put("enableExtendedMediaSaveTitle", new String[] { "Save Zalo Video & post media", "Lưu Zalo Video & media bài viết" });
+        trans.put("notificationMarkReadTitle", new String[] { "Mark as read from notifications", "Đánh dấu đã đọc từ thông báo" });
+        trans.put("promoNotificationFilterTitle", new String[] { "Filter promotional notifications", "Lọc thông báo quảng cáo" });
+        trans.put("hideCallHangupToastTitle", new String[] { "Hide call-ended toast", "Ẩn thông báo người kia kết thúc cuộc gọi" });
+        trans.put("hideZStyleConversationTitle", new String[] { "Hide zStyle conversation", "Ẩn hội thoại zStyle" });
+        trans.put("chatAvatarCometTitle", new String[] { "Animated avatar border", "Viền avatar chuyển động" });
+        trans.put("hiddenSearchSparklesTitle", new String[] { "Hidden chat search icon effect", "Hiệu ứng icon tìm kiếm tin nhắn ẩn" });
+        trans.put("maxVideoQualityTitle", new String[] { "Force highest video quality", "Ép chất lượng video cao nhất" });
+        trans.put("cleanChatListTitle", new String[] { "Clean chat list", "Danh sách chat gọn" });
+        trans.put("readonlyChatsTitle", new String[] { "Read-only chats", "Khoá hội thoại (chỉ đọc)" });
+        trans.put("chatHighlightTitle", new String[] { "Highlight chats as unread", "Đánh dấu chat chưa đọc" });
+        trans.put("minimalTopBarTitle", new String[] { "Minimal top bar", "Thanh trên tối giản" });
+        trans.put("richTextTitle", new String[] { "Rich text formatting", "Định dạng văn bản phong phú" });
+        trans.put("unlimitedQuickMessagesTitle", new String[] { "Unlimited quick messages", "Tin nhắn nhanh không giới hạn" });
+        trans.put("driveContactsBypassTitle", new String[] { "Drive restore without Contacts permission", "Khôi phục Drive không cần quyền Danh bạ" });
+        trans.put("unlimitedPinTitle", new String[] { "Unlimited pinned conversations & ownership", "Ghim hội thoại & quyền sở hữu không giới hạn" });
+        trans.put("botEngineTitle", new String[] { "Bot engine", "Trợ lý tự động" });
+
         // Toasts & Messages
         trans.put("exportSuccess", new String[] { "Exported config file to: ", "Đã xuất tệp cấu hình ra: " });
         trans.put("exportSuccessFormat", new String[] { "Exported config file to: %s", "Đã xuất tệp cấu hình ra: %s" });

@@ -61,3 +61,7 @@ Dự án này được cấp phép theo Giấy phép AGPL-3.0. Xem tệp [LICENS
 - [DexKit](https://github.com/luckypray/DexKit) — runtime dex querying.
 - [smali/dexlib2](https://github.com/google/smali) — dex disassembly.
 - [NPatch](https://github.com/7723mod/NPatch) - Rootless Xposed framework powered by Vector core.
+- [anhpan patches](https://github.com/rustybrozen/anhpan-patches) - chat list, read-only chat and UI tweak ideas.
+- [Nezumi patches](https://github.com/Nezumi-2711/morphe-patches) - HLS/media saving, rich text, notification and quick message features.
+- [zeldrisho patches](https://github.com/zeldrisho/morphe-patches) - notification filtering, Drive and conversation features.
+- [zensetting patches](https://github.com/MrZen287/zensetting-patches) - call and interface tweaks.
