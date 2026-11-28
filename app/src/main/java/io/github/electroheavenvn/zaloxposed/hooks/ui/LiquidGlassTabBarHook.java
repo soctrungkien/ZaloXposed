@@ -432,7 +432,13 @@ public class LiquidGlassTabBarHook extends BaseHook
         {
             this.root = root;
             this.origTabBar = origTabBar;
-            this.mainTabFrameLayout = findMainTabFrameLayout(root);
+            // Never hide the root itself (it can be MainTabFrameLayout) and
+            // never hide a full-screen container - only a small tab strip.
+            View exact = findMainTabFrameLayout(root);
+            int maxBarHeight = Math.round(120f * root.getResources().getDisplayMetrics().density);
+            this.mainTabFrameLayout = (exact != null && exact != root
+                && exact.getWidth() > 0 && exact.getHeight() > 0
+                && exact.getHeight() <= maxBarHeight) ? exact : null;
             this.preDrawListener = () ->
             {
                 if (!attached)
@@ -451,7 +457,9 @@ public class LiquidGlassTabBarHook extends BaseHook
                     origWrapperBar.setAlpha(0f);
                     origWrapperBar.setTranslationY(10000f);
                 }
-                if (mainTabFrameLayout != null && mainTabFrameLayout.getVisibility() != View.GONE)
+                if (mainTabFrameLayout != null && mainTabFrameLayout != root
+                    && mainTabFrameLayout.getHeight() <= Math.round(120f * root.getResources().getDisplayMetrics().density)
+                    && mainTabFrameLayout.getVisibility() != View.GONE)
                 {
                     mainTabFrameLayout.setVisibility(View.GONE);
                     mainTabFrameLayout.setAlpha(0f);
@@ -525,7 +533,6 @@ public class LiquidGlassTabBarHook extends BaseHook
             }
 
             origTabBarVisibility = origTabBar.getVisibility();
-            hideOriginalBar();
 
             View existing = root.findViewWithTag(CUSTOM_TABBAR_TAG);
             if (existing != null && existing.getParent() instanceof ViewGroup p)
@@ -696,7 +703,8 @@ public class LiquidGlassTabBarHook extends BaseHook
             origTabBarMinHeight = origTabBar.getMinimumHeight();
             origTabBarBg = origTabBar.getBackground();
             collapseViewCompletely(origTabBar);
-            if (mainTabFrameLayout != null && mainTabFrameLayout != origTabBar)
+            if (mainTabFrameLayout != null && mainTabFrameLayout != origTabBar
+                && mainTabFrameLayout != root)
                 collapseViewCompletely(mainTabFrameLayout);
             ViewParent parent = origTabBar.getParent();
             if (parent instanceof ViewGroup parentVg && parentVg != root)
