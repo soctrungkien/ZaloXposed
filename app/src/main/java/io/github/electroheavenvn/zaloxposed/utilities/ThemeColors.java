@@ -112,8 +112,7 @@ public final class ThemeColors
             int[] palette = {
                 android.R.color.system_accent1_500,
                 android.R.color.system_accent3_400,
-                android.R.color.system_accent2_500,
-                android.R.color.system_neutral1_500
+                android.R.color.system_accent2_500
             };
             for (int resId : palette)
             {

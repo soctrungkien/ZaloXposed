@@ -185,10 +185,10 @@ public class LiquidGlassTabBarHook extends BaseHook
                 if (ATTACHED.containsKey(root))
                     return;
 
-                // Zalo's concrete stock bar must be hidden completely, not just
-                // the generic bottom-bar candidate.
-                ViewGroup exact = findMainTabFrameLayout(root);
-                ViewGroup origTabBar = exact != null ? exact : findBottomTabBar(root);
+                // Keep the heuristic for the actual tab strip (MainTabFrameLayout
+                // is only an outer container and may not hold the tab children).
+                // The concrete Zalo frame is still hidden separately.
+                ViewGroup origTabBar = findBottomTabBar(root);
                 if (origTabBar != null)
                 {
                     TabBarReplacement rep = new TabBarReplacement(root, origTabBar);
@@ -1393,10 +1393,6 @@ public class LiquidGlassTabBarHook extends BaseHook
                 if (!capsuleRect.isEmpty())
                 {
                     float capR = capsuleRect.height() * 0.5f;
-                    Paint dockFill = new Paint(Paint.ANTI_ALIAS_FLAG);
-                    dockFill.setStyle(Paint.Style.FILL);
-                    dockFill.setColor(owner.isDarkTheme ? 0x20101418 : 0x20F5F8FF);
-                    rc.drawRoundRect(capsuleRect, capR, capR, dockFill);
                     Paint dockRim = new Paint(Paint.ANTI_ALIAS_FLAG);
                     dockRim.setStyle(Paint.Style.STROKE);
                     dockRim.setStrokeWidth(0.65f * density);
