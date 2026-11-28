@@ -100,46 +100,53 @@ public final class ThemeColors
 
     private static int extractMonet(Context context)
     {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S || context == null)
+        if (context == null)
             return 0;
-        try
-        {
-            WallpaperManager manager = WallpaperManager.getInstance(context);
-            int[] flags = {WallpaperManager.FLAG_SYSTEM, WallpaperManager.FLAG_LOCK};
-            for (int flag : flags)
-            {
-                WallpaperColors colors = manager.getWallpaperColors(flag);
-                if (colors == null)
-                    continue;
-                int best = 0;
-                float bestScore = -1f;
-                Color[] candidates = {
-                    colors.getPrimaryColor(),
-                    colors.getSecondaryColor(),
-                    colors.getTertiaryColor()
-                };
-                for (Color candidate : candidates)
-                {
-                    if (candidate == null)
-                        continue;
-                    int argb = candidate.toArgb();
-                    float[] hsv = new float[3];
-                    android.graphics.Color.colorToHSV(argb, hsv);
-                    float score = hsv[1] * 1.4f + hsv[2] * 0.6f;
-                    if (score > bestScore)
-                    {
-                        bestScore = score;
-                        best = argb;
-                    }
-                }
-                if (best != 0)
-                    return best;
-            }
-        }
-        catch (Throwable ignored) { }
 
-        // getWallpaperColors() can return null for some launchers/contexts.
-        // Fall back to sampling the actual wallpaper drawable.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+        {
+            // Android 12+: use the platform Monotone/WallpaperColors API only.
+            // Do NOT substitute a sampled image here - the system palette is
+            // the requested source on modern Android.
+            try
+            {
+                WallpaperManager manager = WallpaperManager.getInstance(context);
+                int[] flags = {WallpaperManager.FLAG_SYSTEM, WallpaperManager.FLAG_LOCK};
+                for (int flag : flags)
+                {
+                    WallpaperColors colors = manager.getWallpaperColors(flag);
+                    if (colors == null)
+                        continue;
+                    Color[] candidates = {
+                        colors.getPrimaryColor(),
+                        colors.getSecondaryColor(),
+                        colors.getTertiaryColor()
+                    };
+                    int best = 0;
+                    float bestScore = -1f;
+                    for (Color candidate : candidates)
+                    {
+                        if (candidate == null)
+                            continue;
+                        int argb = candidate.toArgb();
+                        float[] hsv = new float[3];
+                        Color.colorToHSV(argb, hsv);
+                        float score = hsv[1] * 1.4f + hsv[2] * 0.6f;
+                        if (score > bestScore)
+                        {
+                            bestScore = score;
+                            best = argb;
+                        }
+                    }
+                    if (best != 0)
+                        return best;
+                }
+            }
+            catch (Throwable ignored) { }
+            return 0;
+        }
+
+        // Android 11 and older: no WallpaperColors API, sample the wallpaper image.
         try
         {
             Drawable wallpaper = WallpaperManager.getInstance(context).getDrawable();

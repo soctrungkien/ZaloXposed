@@ -49,6 +49,7 @@ import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
 import io.github.electroheavenvn.zaloxposed.utilities.Config;
 import io.github.electroheavenvn.zaloxposed.utilities.DexKitCache;
 import io.github.electroheavenvn.zaloxposed.utilities.Logger;
+import io.github.electroheavenvn.zaloxposed.utilities.ThemeColors;
 
 /**
  * Single-Pass Real-Backdrop GPU Liquid Glass Bottom TabBar (v15):
@@ -954,6 +955,52 @@ public class LiquidGlassTabBarHook extends BaseHook
     @SuppressLint("ViewConstructor")
     private static final class LiquidGlassTabBarView extends View
     {
+        /** V6 damped spring - keeps velocity when the target changes direction. */
+        private static final class Spring
+        {
+            private float value, target, velocity;
+            private float stiffness, dampingRatio;
+
+            Spring(float initial, float k, float damping)
+            {
+                value = target = initial;
+                stiffness = k;
+                dampingRatio = damping;
+            }
+
+            void animateTo(float next) { target = next; }
+
+            void snapTo(float next)
+            {
+                value = target = next;
+                velocity = 0f;
+            }
+
+            boolean update(float seconds)
+            {
+                float dt = clamp(seconds, 0.001f, 0.034f);
+                int steps = Math.max(1, (int)Math.ceil(dt / 0.008f));
+                float h = dt / steps;
+                float damping = 2f * dampingRatio * (float)Math.sqrt(stiffness);
+                for (int i = 0; i < steps; i++)
+                {
+                    velocity += (-stiffness * (value - target) - damping * velocity) * h;
+                    value += velocity * h;
+                }
+                if (Math.abs(target - value) < 0.0015f && Math.abs(velocity) < 0.008f)
+                {
+                    value = target;
+                    velocity = 0f;
+                    return false;
+                }
+                return true;
+            }
+
+            float value() { return value; }
+            float velocity() { return velocity; }
+            float targetOf() { return target; }
+        }
+
         // Real-Backdrop Single-Pass Optical Liquid Glass Shader (v15):
         // - Refracts live Zalo views & wallpaper underneath BOTH along the TabBar capsule bevel
         //   AND across the full protruding Liquid Glass lens (with 3-channel Cauchy RGB dispersion).
@@ -1101,6 +1148,16 @@ public class LiquidGlassTabBarHook extends BaseHook
         private float targetBarOffsetY = 0f;
         private float barScale = 1f;
         private float targetBarScale = 1f;
+        private float scaleY = 1f;
+        private float stretchY = 0f;
+
+        // V6 motion: position 1000/1, press 420/0.90, scaleX 150/0.68,
+        // scaleY 175/0.76, stretch 210/0.79.
+        private final Spring posSpring = new Spring(0.5f, 1000f, 1f);
+        private final Spring pressSpring = new Spring(0f, 420f, 0.90f);
+        private final Spring scaleXSpring = new Spring(1f, 150f, 0.68f);
+        private final Spring scaleYSpring = new Spring(1f, 175f, 0.76f);
+        private final Spring stretchSpring = new Spring(0f, 210f, 0.79f);
 
         // Scroll-to-minimize state
         private float collapseProgress = 0f;
@@ -1234,8 +1291,11 @@ public class LiquidGlassTabBarHook extends BaseHook
 
             float cx = baseCapsuleRect.centerX() + barOffsetX;
             float cy = baseCapsuleRect.centerY() + shiftDown + barOffsetY;
-            float halfW = (baseCapsuleRect.width() * 0.5f - shrinkX) * barScale;
-            float halfH = (baseCapsuleRect.height() * 0.5f - shrinkH * 0.5f) * barScale;
+            // V6: the dock itself never scales with press. Only the dock seen
+            // through the droplet contracts 15% in Y (applied exactly once).
+            float halfW = baseCapsuleRect.width() * 0.5f - shrinkX;
+            float innerDockScaleY = 1f - 0.15f * clamp(inflateProgress, 0f, 1f);
+            float halfH = (baseCapsuleRect.height() * 0.5f - shrinkH * 0.5f) * innerDockScaleY;
 
             capsuleRect.set(cx - halfW, cy - halfH, cx + halfW, cy + halfH);
             capsuleClipPath.reset();
@@ -1289,6 +1349,23 @@ public class LiquidGlassTabBarHook extends BaseHook
                     rc.clipRect(0, 0, topContent.getWidth(), topContent.getHeight());
                     topContent.draw(rc);
                     rc.restore();
+                }
+
+                // Put the dock material and its thin silver edge into the
+                // optical input so the droplet refracts the REAL dock border
+                // (detail B), not a flat line drawn on top of the lens.
+                if (!capsuleRect.isEmpty())
+                {
+                    float capR = capsuleRect.height() * 0.5f;
+                    Paint dockFill = new Paint(Paint.ANTI_ALIAS_FLAG);
+                    dockFill.setStyle(Paint.Style.FILL);
+                    dockFill.setColor(owner.isDarkTheme ? 0x20101418 : 0x20F5F8FF);
+                    rc.drawRoundRect(capsuleRect, capR, capR, dockFill);
+                    Paint dockRim = new Paint(Paint.ANTI_ALIAS_FLAG);
+                    dockRim.setStyle(Paint.Style.STROKE);
+                    dockRim.setStrokeWidth(0.65f * density);
+                    dockRim.setColor(owner.isDarkTheme ? 0x66FFFFFF : 0x99FFFFFF);
+                    rc.drawRoundRect(capsuleRect, capR, capR, dockRim);
                 }
             }
             catch (Throwable ignored) { }
@@ -1385,12 +1462,24 @@ public class LiquidGlassTabBarHook extends BaseHook
             if (count == 0)
                 return;
             float tabW = capsuleRect.width() / count;
+            // V6: foreground content grows from 1.0 to 1.20 only while pressed;
+            // geometry of the dock itself is independent (no font shrinking).
+            float contentScale = 1f + 0.20f * clamp(inflateProgress, 0f, 1f);
             for (int i = 0; i < count; i++)
             {
                 TabItemInfo info = owner.tabs.get(i);
                 float cx = capsuleRect.left + tabW * (i + 0.5f);
                 float cy = capsuleRect.centerY();
+                boolean underLens = i == activeIndex || (pointerDown && i == hoveredIndex);
+                int save = canvas.save();
+                if (underLens && contentScale > 1.001f)
+                {
+                    canvas.translate(cx, cy);
+                    canvas.scale(contentScale, contentScale);
+                    canvas.translate(-cx, -cy);
+                }
                 drawSingleTabItem(canvas, info, cx, cy, color, activeBold || i == activeIndex);
+                canvas.restoreToCount(save);
             }
         }
 
@@ -1621,12 +1710,10 @@ public class LiquidGlassTabBarHook extends BaseHook
             float restH = Math.max(capsuleRect.height() - dpf(10f), dpf(36f));
             float restW = Math.max(tabW - dpf(4f), restH * 1.22f);
 
-            float inflatedH = capsuleRect.height() + dpf(18.0f);
-            float inflatedW = Math.max(tabW * 1.72f, inflatedH * 1.56f);
-
-            float absStretch = Math.abs(stretchX);
-            float w = (restW + (inflatedW - restW) * inflateProgress) * (1f + absStretch * 0.36f);
-            float h = (restH + (inflatedH - restH) * inflateProgress) * (1f - absStretch * 0.14f);
+            // V6: pressed droplet scale 1.42 (clamped 1.52), velocity stretch
+            // up to +24% horizontally and -14% vertically, spring-driven.
+            float w = restW * barScale * (1f + stretchX * 0.24f);
+            float h = restH * scaleY * (1f - stretchY * 0.14f);
 
             float cx = capsuleRect.left + currentTabPos * tabW;
             float cy = capsuleRect.centerY();
@@ -1670,7 +1757,7 @@ public class LiquidGlassTabBarHook extends BaseHook
                     targetTouchGlow = 1f;
                     targetBarOffsetX = clamp((x - baseCapsuleRect.centerX()) * 0.022f, -dpf(4.5f), dpf(4.5f));
                     targetBarOffsetY = clamp((y - baseCapsuleRect.centerY()) * 0.03f, -dpf(2.2f), dpf(2.2f));
-                    targetBarScale = 1.016f;
+                    targetBarScale = 1.42f;
 
                     int hit = indexForX(x, count);
                     hoveredIndex = hit;
@@ -1696,7 +1783,7 @@ public class LiquidGlassTabBarHook extends BaseHook
                     targetTouchGlow = 1f;
                     targetBarOffsetX = clamp((x - baseCapsuleRect.centerX()) * 0.026f, -dpf(5.5f), dpf(5.5f));
                     targetBarOffsetY = clamp((y - baseCapsuleRect.centerY()) * 0.035f, -dpf(2.5f), dpf(2.5f));
-                    targetBarScale = 1.018f;
+                    targetBarScale = 1.42f;
 
                     float tabW = capsuleRect.width() / count;
                     float minCx = capsuleRect.left + tabW * 0.44f;
@@ -1765,8 +1852,11 @@ public class LiquidGlassTabBarHook extends BaseHook
             postOnAnimation(animTick);
         }
 
-        private static int liquidAccent(boolean dark)
+        private int liquidAccent(boolean dark)
         {
+            // Custom liquid color wins; otherwise use the shared Zalo accent,
+            // which resolves Monet from the Android system palette on 12+
+            // and from the wallpaper image only on older Android.
             String custom = Config.getLiquidGlassColor();
             if (custom != null && !custom.isEmpty())
             {
@@ -1776,7 +1866,7 @@ public class LiquidGlassTabBarHook extends BaseHook
                 }
                 catch (Throwable ignored) { }
             }
-            return dark ? 0xFF0A84FF : 0xFF007AFF;
+            return ThemeColors.getAccent(getContext());
         }
 
         private final Runnable animTick = new Runnable()
@@ -1788,22 +1878,58 @@ public class LiquidGlassTabBarHook extends BaseHook
                 float dt = clamp((now - lastFrameMs) / 1000f, 0.001f, 0.034f);
                 lastFrameMs = now;
 
-                float stiffness = 360f;
-                float damping = 28f;
-                float force = (targetTabPos - currentTabPos) * stiffness;
-                velocityTab = (velocityTab + force * dt) * Math.max(0f, 1f - damping * dt);
-                currentTabPos += velocityTab * dt;
+                // Honor system-wide animation scale / reduced motion.
+                if (!android.animation.ValueAnimator.areAnimatorsEnabled())
+                {
+                    posSpring.snapTo(targetTabPos);
+                    pressSpring.snapTo(targetInflate);
+                    scaleXSpring.snapTo(targetBarScale);
+                    scaleYSpring.snapTo(targetBarScale);
+                    stretchSpring.snapTo(0f);
+                    currentTabPos = targetTabPos;
+                    velocityTab = 0f;
+                    inflateProgress = targetInflate;
+                    barScale = scaleY = targetBarScale;
+                    stretchX = stretchY = 0f;
+                    touchGlowAlpha = targetTouchGlow;
+                    barOffsetX = targetBarOffsetX;
+                    barOffsetY = targetBarOffsetY;
+                    collapseProgress = targetCollapse;
+                    animating = false;
+                    invalidate();
+                    return;
+                }
+
+                posSpring.animateTo(targetTabPos);
+                boolean moving = posSpring.update(dt);
+                currentTabPos = posSpring.value();
+                velocityTab = posSpring.velocity();
+
+                pressSpring.animateTo(targetInflate);
+                moving |= pressSpring.update(dt);
+                inflateProgress = clamp(pressSpring.value(), 0f, 1f);
+
+                // Droplet expands to 1.42 while held/dragged, clamped to 1.52.
+                scaleXSpring.animateTo(targetBarScale);
+                moving |= scaleXSpring.update(dt);
+                barScale = clamp(scaleXSpring.value(), 1f, 1.52f);
+                scaleYSpring.animateTo(targetBarScale);
+                moving |= scaleYSpring.update(dt);
+                scaleY = clamp(scaleYSpring.value(), 1f, 1.52f);
+
+                // Normalized velocity -> organic stretch (max +24% X / -14% Y).
+                float normalizedVelocity = clamp(velocityTab / 4f, -1f, 1f);
+                float stretchTarget = (pointerDown || isDragging) ? Math.abs(normalizedVelocity) : 0f;
+                stretchSpring.animateTo(stretchTarget);
+                moving |= stretchSpring.update(dt);
+                stretchX = clamp(stretchSpring.value(), 0f, 1f);
+                stretchY = stretchX;
 
                 float lerp = 1f - (float) Math.exp(-18f * dt);
-                inflateProgress += (targetInflate - inflateProgress) * (1f - (float) Math.exp(-16f * dt));
                 touchGlowAlpha += (targetTouchGlow - touchGlowAlpha) * (1f - (float) Math.exp(-14f * dt));
                 barOffsetX += (targetBarOffsetX - barOffsetX) * lerp;
                 barOffsetY += (targetBarOffsetY - barOffsetY) * lerp;
-                barScale += (targetBarScale - barScale) * lerp;
                 collapseProgress += (targetCollapse - collapseProgress) * (1f - (float) Math.exp(-12f * dt));
-
-                if (!isDragging)
-                    stretchX += (0f - stretchX) * (1f - (float) Math.exp(-16f * dt));
 
                 invalidate();
 
@@ -1814,21 +1940,27 @@ public class LiquidGlassTabBarHook extends BaseHook
                     && Math.abs(targetBarOffsetX - barOffsetX) < 0.15f
                     && Math.abs(targetBarOffsetY - barOffsetY) < 0.15f
                     && Math.abs(targetBarScale - barScale) < 0.001f
+                    && Math.abs(targetBarScale - scaleY) < 0.001f
                     && Math.abs(targetCollapse - collapseProgress) < 0.005f
-                    && Math.abs(stretchX) < 0.004f
+                    && Math.abs(stretchSpring.value() - stretchSpring.targetOf()) < 0.004f
                     && !pointerDown;
 
-                if (done)
+                if (done && !moving)
                 {
+                    posSpring.snapTo(targetTabPos);
+                    pressSpring.snapTo(targetInflate);
+                    scaleXSpring.snapTo(targetBarScale);
+                    scaleYSpring.snapTo(targetBarScale);
+                    stretchSpring.snapTo(0f);
                     currentTabPos = targetTabPos;
+                    velocityTab = 0f;
                     inflateProgress = targetInflate;
+                    barScale = scaleY = targetBarScale;
+                    stretchX = stretchY = 0f;
                     touchGlowAlpha = targetTouchGlow;
                     barOffsetX = targetBarOffsetX;
                     barOffsetY = targetBarOffsetY;
-                    barScale = targetBarScale;
                     collapseProgress = targetCollapse;
-                    velocityTab = 0f;
-                    stretchX = 0f;
                     animating = false;
                     invalidate();
                 }
