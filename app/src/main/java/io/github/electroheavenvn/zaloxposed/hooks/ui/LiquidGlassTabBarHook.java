@@ -208,6 +208,27 @@ public class LiquidGlassTabBarHook extends BaseHook
         root.post(task);
     }
 
+    /** Finds a view by its exact class name (or simple-name suffix). */
+    private static View findViewByClassName(View view, String className)
+    {
+        if (view == null)
+            return null;
+        String name = view.getClass().getName();
+        if (className.equals(name) || name.endsWith("." + className)
+            || name.endsWith("$" + className))
+            return view;
+        if (view instanceof ViewGroup group)
+        {
+            for (int i = 0; i < group.getChildCount(); i++)
+            {
+                View found = findViewByClassName(group.getChildAt(i), className);
+                if (found != null)
+                    return found;
+            }
+        }
+        return null;
+    }
+
     /** Finds Zalo's stock com.zing.zalo.uicontrol.MainTabFrameLayout by class name. */
     private static ViewGroup findMainTabFrameLayout(View view)
     {
@@ -398,6 +419,7 @@ public class LiquidGlassTabBarHook extends BaseHook
         private android.graphics.drawable.Drawable origTabBarBg;
         private View hiddenDivider;
         private View mainTabFrameLayout;
+        private View customMainTab;
         private int origDividerHeight = ViewGroup.LayoutParams.WRAP_CONTENT;
         private ViewGroup origWrapperBar;
         private int origWrapperVisibility = View.VISIBLE;
@@ -439,6 +461,9 @@ public class LiquidGlassTabBarHook extends BaseHook
             this.mainTabFrameLayout = (exact != null && exact != root
                 && exact.getWidth() > 0 && exact.getHeight() > 0
                 && exact.getHeight() <= maxBarHeight) ? exact : null;
+            // The real visible tab strip is CustomMainTab - hide that, not the
+            // full-screen MainTabFrameLayout container.
+            this.customMainTab = findViewByClassName(root, "CustomMainTab");
             this.preDrawListener = () ->
             {
                 if (!attached)
@@ -464,6 +489,13 @@ public class LiquidGlassTabBarHook extends BaseHook
                     mainTabFrameLayout.setVisibility(View.GONE);
                     mainTabFrameLayout.setAlpha(0f);
                     mainTabFrameLayout.setTranslationY(10000f);
+                }
+                if (customMainTab != null && customMainTab != root
+                    && customMainTab.getVisibility() != View.GONE)
+                {
+                    customMainTab.setVisibility(View.GONE);
+                    customMainTab.setAlpha(0f);
+                    customMainTab.setTranslationY(10000f);
                 }
                 return true;
             };
@@ -560,6 +592,9 @@ public class LiquidGlassTabBarHook extends BaseHook
             root.setClipToPadding(false);
             root.addView(customBar, lp);
             customBar.bringToFront();
+
+            // Hide the stock strip only after the replacement is in place.
+            hideOriginalBar();
 
             attached = true;
             syncStateFromOriginal();
@@ -706,6 +741,8 @@ public class LiquidGlassTabBarHook extends BaseHook
             if (mainTabFrameLayout != null && mainTabFrameLayout != origTabBar
                 && mainTabFrameLayout != root)
                 collapseViewCompletely(mainTabFrameLayout);
+            if (customMainTab != null && customMainTab != origTabBar)
+                collapseViewCompletely(customMainTab);
             ViewParent parent = origTabBar.getParent();
             if (parent instanceof ViewGroup parentVg && parentVg != root)
             {
