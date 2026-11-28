@@ -40,6 +40,9 @@ public class InterfaceTweaksHook extends BaseHook
     private static final ThreadLocal<Boolean> HIDDEN_ICON_SIGNAL =
         ThreadLocal.withInitial(() -> Boolean.FALSE);
 
+    private static final ThreadLocal<Boolean> SPARKLE_MUTATING =
+        ThreadLocal.withInitial(() -> Boolean.FALSE);
+
     private static final Paint RING_PAINT = new Paint(Paint.ANTI_ALIAS_FLAG);
     private static SweepGradient ringShader;
 
@@ -201,6 +204,7 @@ public class InterfaceTweaksHook extends BaseHook
             {
                 Object result = chain.proceed();
                 if (Config.getEnableHiddenSearchSparkles()
+                    && !Boolean.TRUE.equals(SPARKLE_MUTATING.get())
                     && Boolean.TRUE.equals(HIDDEN_ICON_SIGNAL.get())
                     && chain.getThisObject() instanceof ImageView view)
                     SparkleIcon.apply(view);
@@ -211,6 +215,7 @@ public class InterfaceTweaksHook extends BaseHook
             {
                 Object result = chain.proceed();
                 if (Config.getEnableHiddenSearchSparkles()
+                    && !Boolean.TRUE.equals(SPARKLE_MUTATING.get())
                     && Boolean.TRUE.equals(HIDDEN_ICON_SIGNAL.get())
                     && chain.getThisObject() instanceof ImageView view)
                     SparkleIcon.restore(view);
@@ -250,8 +255,11 @@ public class InterfaceTweaksHook extends BaseHook
 
         static void apply(ImageView view)
         {
+            if (Boolean.TRUE.equals(SPARKLE_MUTATING.get()))
+                return;
             if (view.getDrawable() instanceof SparkleDrawable)
                 return;
+            SPARKLE_MUTATING.set(Boolean.TRUE);
             try
             {
                 Drawable original = view.getDrawable();
@@ -267,10 +275,17 @@ public class InterfaceTweaksHook extends BaseHook
             {
                 Logger.e(t);
             }
+            finally
+            {
+                SPARKLE_MUTATING.set(Boolean.FALSE);
+            }
         }
 
         static void restore(ImageView view)
         {
+            if (Boolean.TRUE.equals(SPARKLE_MUTATING.get()))
+                return;
+            SPARKLE_MUTATING.set(Boolean.TRUE);
             try
             {
                 Drawable current = view.getDrawable();
@@ -284,6 +299,10 @@ public class InterfaceTweaksHook extends BaseHook
             catch (Throwable t)
             {
                 Logger.e(t);
+            }
+            finally
+            {
+                SPARKLE_MUTATING.set(Boolean.FALSE);
             }
         }
 
